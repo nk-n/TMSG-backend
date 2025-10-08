@@ -57,7 +57,7 @@ public class SecurityConfig {
                                 // public endpoints
 //                                .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/auth/signin").permitAll()
-
+                                .requestMatchers("/api/metadata/**").permitAll()
 
                                 // Role-based endpoints
                                 .requestMatchers(HttpMethod.POST, "/api/auth/new-user").hasAnyAuthority("ROLE_ADMIN")
