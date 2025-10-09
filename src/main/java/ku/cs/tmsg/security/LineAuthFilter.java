@@ -4,20 +4,24 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import ku.cs.tmsg.service.CustomUserDetailsService;
+import ku.cs.tmsg.service.LineAuthenticationToken;
+import ku.cs.tmsg.service.LineUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.authentication.*;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 
-
-@Component
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class LineAuthFilter extends OncePerRequestFilter {
 
 
     @Autowired
@@ -25,7 +29,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private LineUserDetailsService userDetailsService;
 
 
     @Override
@@ -39,11 +43,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try {
             String jwt = null;
 
+
             String path = request.getRequestURI();
-            if (path.startsWith("/api/line/")) {
+            if (!path.startsWith("/api/line/")) {
                 filterChain.doFilter(request, response);
                 return;
             }
+
 
             // Get authorization header and validate
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -53,8 +59,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             // Get jwt token and validate
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                String username = jwtUtils.getUsernameFromToken(jwt);
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                String lineID = jwtUtils.getUserIDFromToken(jwt);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(lineID);
                 UsernamePasswordAuthenticationToken auth =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -68,8 +74,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            System.out.println("Cannot set user authentication: " + e);
+            System.out.println("Cannot set line authentication: " + e);
         }
     }
 }
-

@@ -53,15 +53,15 @@ public class LineAuthService {
             }
 
             // set authority
-            List<GrantedAuthority> authorities = new ArrayList<>();
-            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
-
-            UserDetails userDetails = detailsService.loadUserByUsername(userId);
-
-            Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
-
-
-            SecurityContextHolder.getContext().setAuthentication(auth);
+//            List<GrantedAuthority> authorities = new ArrayList<>();
+//            authorities.add(new SimpleGrantedAuthority("ROLE_DRIVER"));
+//
+//            UserDetails userDetails = detailsService.loadUserByUsername(userId);
+//
+//            Authentication auth = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+//
+//
+//            SecurityContextHolder.getContext().setAuthentication(auth);
 
 
             // issue our own JWT.
