@@ -1,6 +1,7 @@
 package ku.cs.tmsg.security;
 
 
+import com.auth0.jwt.JWT;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import com.auth0.jwt.interfaces.DecodedJWT;
 
 
 @Component
@@ -73,5 +75,10 @@ public class JwtUtil {
             System.out.println("JWT claims string is empty: " + e.getMessage());
         }
         return false;
+    }
+
+    public String getUserIDFromToken(String token) {
+        DecodedJWT jwt = JWT.decode(token);
+        return jwt.getSubject();
     }
 }
