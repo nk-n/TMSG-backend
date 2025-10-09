@@ -1,4 +1,4 @@
-package ku.cs.tmsg.config;
+package ku.cs.tmsg.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +12,9 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
+//        config.addAllowedOrigin("*");
         config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedOrigin("https://tmsg.nk-n.com");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 //        config.setAllowCredentials(true);

@@ -2,6 +2,7 @@ package ku.cs.tmsg.repository;
 
 import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.Driver;
+import ku.cs.tmsg.entity.User;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.entity.enums.CarType;
 import ku.cs.tmsg.entity.enums.CarWeight;
@@ -45,6 +46,32 @@ public class DriverRepository {
         String query = "select เบอร์โทร,ชื่อ,Line_ID,หมายเหตุพนักงานขับรถ,พร้อมทำงาน,สถานะพนักงาน from พนักงานขับรถ";
         List<Driver> drivers = jdbcTemplate.query(query, new DriverRepository.DriverMapper());
         return  drivers;
+    }
+
+    public int updateLineIdByPhone(String phone, String lineId) {
+        System.out.println(lineId.length());
+        String sql = "UPDATE `พนักงานขับรถ` SET `LINE_ID` = ? WHERE `เบอร์โทร` = ?";
+        return jdbcTemplate.update(sql, lineId, phone);
+    }
+
+    public Driver findByPhone(String phone) {
+        String query = "select เบอร์โทร,ชื่อ,Line_ID,หมายเหตุพนักงานขับรถ,พร้อมทำงาน,สถานะพนักงาน from พนักงานขับรถ where เบอร์โทร=?";
+        List<Driver> drivers = jdbcTemplate.query(query, new DriverRepository.DriverMapper(), phone);
+        return drivers.isEmpty() ? null : drivers.getFirst();
+    }
+
+    public boolean isExists(String phone) {
+        return findByPhone(phone) != null;
+    }
+
+    public Driver findByID(String ID) {
+        String query = "select เบอร์โทร,ชื่อ,Line_ID,หมายเหตุพนักงานขับรถ,พร้อมทำงาน,สถานะพนักงาน from พนักงานขับรถ where Line_ID=?";
+        List<Driver> drivers = jdbcTemplate.query(query, new DriverRepository.DriverMapper(), ID);
+        return drivers.isEmpty() ? null : drivers.getFirst();
+    }
+
+    public boolean isExistsByID(String id) {
+        return findByID(id) != null;
     }
 
     class DriverMapper implements RowMapper<Driver> {

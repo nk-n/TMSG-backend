@@ -55,14 +55,17 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
                                 // public endpoints
-//                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/auth/signin").permitAll()
-                                .requestMatchers("/api/metadata/**").permitAll()
-                                .requestMatchers("/api/auth/line").permitAll()
+//                                .requestMatchers("/api/metadata/**").permitAll()
+//                                .requestMatchers("/api/auth/line").permitAll()
+//                                .requestMatchers("/api/auth/line-link").permitAll()
 
 
                                 // Role-based endpoints
                                 .requestMatchers(HttpMethod.POST, "/api/auth/new-user").hasAnyAuthority("ROLE_ADMIN")
+
+                                .requestMatchers(HttpMethod.GET,"/api/metadata/**").hasAnyAuthority("ROLE_USER, ROLE_DRIVER")
 
 
 
