@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -63,6 +64,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain lineChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .securityMatcher("/api/line/**")
                 .csrf(csrf -> csrf.disable())
                 .authenticationProvider(lineAuthProvider)
@@ -81,6 +83,7 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .securityMatcher("/api/**")
                 // Disable CSRF (not needed for stateless JWT)
                 .csrf(csrf -> csrf.disable())
@@ -103,7 +106,7 @@ public class SecurityConfig {
                                 // Role-based endpoints
                                 .requestMatchers(HttpMethod.POST, "/api/auth/new-user").hasAnyAuthority("ROLE_ADMIN")
 
-                                .requestMatchers(HttpMethod.GET,"/api/metadata/**").hasAnyAuthority("ROLE_USER")
+                                .requestMatchers("/api/metadata/**").permitAll()
 
 
 

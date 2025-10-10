@@ -88,4 +88,15 @@ public class DriverRepository {
         }
     }
 
+    public void update(CarAndDriverStatus status, boolean available, String tel) throws Exception {
+        String query = """
+                UPDATE พนักงานขับรถ 
+                SET 
+                    สถานะพนักงาน = ?,
+                    พร้อมทำงาน = ?
+                WHERE เบอร์โทร = ?
+                """;
+        jdbcTemplate.update(query, status.getDisplayName(), available, tel);
+    }
+
 }
