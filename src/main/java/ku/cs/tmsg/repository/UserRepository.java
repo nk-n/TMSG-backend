@@ -59,7 +59,7 @@ public class UserRepository {
             String username = rs.getString("ID");
             String name = rs.getString("ชื่อ");
             String phone =  rs.getString("เบอร์โทร");
-            int status = rs.getBoolean("พร้อมทำงาน");
+            boolean status = rs.getBoolean("พร้อมทำงาน");
             String role = rs.getString("ตำแหน่ง");
             String password = rs.getString("รหัสผ่าน");
             User user = new User();
