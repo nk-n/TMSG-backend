@@ -1,15 +1,15 @@
 package ku.cs.tmsg.repository;
 
-import ku.cs.tmsg.dto.NewUserRequest;
 import ku.cs.tmsg.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 @Repository
@@ -22,8 +22,8 @@ public class UserRepository {
     }
 
     public User findByUsername(String username) {
-        String query = "select ID,ชื่อ,พนักงานจัดส่งพร้อมทำงาน,เบอร์โทร,ตำแหน่ง,รหัสผ่าน from พนักงานจัดส่ง where ID=?";
-        List<User> users = jdbcTemplate.query(query, new AdminMapper(), username);
+        String query = "select ID,ชื่อ,พร้อมทำงาน,เบอร์โทร,ตำแหน่ง,รหัสผ่าน from พนักงานจัดส่ง where ID=?";
+        List<User> users = jdbcTemplate.query(query, new UserMapper(), username);
         return users.isEmpty() ? null : users.getFirst();
     }
 
@@ -32,7 +32,7 @@ public class UserRepository {
     }
 
     public User save(User user) {
-        String query = "insert into พนักงานจัดส่ง (ID,ชื่อ,พนักงานจัดส่งพร้อมทำงาน,เบอร์โทร,ตำแหน่ง,รหัสผ่าน) values (?,?,?,?,?,?)";
+        String query = "insert into พนักงานจัดส่ง (ID,ชื่อ,พร้อมทำงาน,เบอร์โทร,ตำแหน่ง,รหัสผ่าน) values (?,?,?,?,?,?)";
         int status = jdbcTemplate.update(query, user.getId(), user.getName(), true, user.getPhone(), user.getRole(), user.getPassword());
         if (status == 0) {
             System.err.println("Can't create new user.");
@@ -41,13 +41,25 @@ public class UserRepository {
         return user;
     }
 
-    class AdminMapper implements RowMapper<User> {
+    public List<User> findAll() {
+        String query = "select ID,ชื่อ,พร้อมทำงาน,เบอร์โทร,ตำแหน่ง,รหัสผ่าน from พนักงานจัดส่ง where พร้อมทำงาน=1";
+        List<User> users;
+        try {
+             users = jdbcTemplate.query(query, new UserMapper());
+             return users;
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage()) {
+            };
+        }
+    }
+
+    class UserMapper implements RowMapper<User> {
         @Override
         public User mapRow(ResultSet rs, int rowNum) throws SQLException {
             String username = rs.getString("ID");
             String name = rs.getString("ชื่อ");
             String phone =  rs.getString("เบอร์โทร");
-            boolean status = rs.getBoolean("พนักงานจัดส่งพร้อมทำงาน");
+            int status = rs.getBoolean("พร้อมทำงาน");
             String role = rs.getString("ตำแหน่ง");
             String password = rs.getString("รหัสผ่าน");
             User user = new User();

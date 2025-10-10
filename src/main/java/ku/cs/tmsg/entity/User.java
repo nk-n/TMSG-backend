@@ -12,7 +12,7 @@ public class User {
     private String id;
     @Column(name="ชื่อ")
     private String name;
-    @Column(name="พนักงานจัดส่งพร้อมทำงาน")
+    @Column(name="พร้อมทำงาน")
     private boolean status;
     @Column(name="เบอร์โทร")
     private String phone;
