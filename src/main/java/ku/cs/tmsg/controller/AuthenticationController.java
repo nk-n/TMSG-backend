@@ -1,7 +1,7 @@
 package ku.cs.tmsg.controller;
 
-import ku.cs.tmsg.dto.LoginRequest;
-import ku.cs.tmsg.dto.NewUserRequest;
+import ku.cs.tmsg.dto.request.LoginRequest;
+import ku.cs.tmsg.dto.request.NewUserRequest;
 import ku.cs.tmsg.security.JwtUtil;
 import ku.cs.tmsg.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

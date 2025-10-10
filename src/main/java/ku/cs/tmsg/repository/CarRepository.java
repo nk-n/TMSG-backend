@@ -1,5 +1,6 @@
 package ku.cs.tmsg.repository;
 
+import ku.cs.tmsg.dto.request.CarUpdate;
 import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.entity.enums.CarType;
@@ -63,6 +64,17 @@ public class CarRepository {
             String license = rs.getString("ทะเบียนรถ");
             return car;
         }
+    }
+
+    public void update(CarAndDriverStatus status, boolean available, String id) throws Exception {
+        String query = """
+                UPDATE รถขนส่ง 
+                SET 
+                    สถานะรถ = ?,
+                    พร้อมขนส่ง = ?
+                WHERE เบอร์รถ = ?
+                """;
+        jdbcTemplate.update(query, status.getDisplayName(), available, id);
     }
 
 }

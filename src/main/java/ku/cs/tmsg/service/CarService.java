@@ -1,13 +1,12 @@
 package ku.cs.tmsg.service;
 
-import ku.cs.tmsg.dto.CarRequest;
+import ku.cs.tmsg.dto.request.CarCreate;
+import ku.cs.tmsg.dto.request.CarUpdate;
 import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.entity.enums.CarType;
 import ku.cs.tmsg.entity.enums.CarWeight;
-import ku.cs.tmsg.exception.NotFoundException;
 import ku.cs.tmsg.repository.CarRepository;
-import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +21,8 @@ public class CarService {
         this.carRepository = carRepository;
     }
 
-    public void createCar(List<CarRequest> request) throws Exception {
-        for (CarRequest carRequest : request) {
+    public void createCar(List<CarCreate> request) throws Exception {
+        for (CarCreate carRequest : request) {
             Car car = new Car();
             car.setId(carRequest.getId());
             car.setStatus(CarAndDriverStatus.fromLabel(carRequest.getStatus()));
@@ -38,5 +37,11 @@ public class CarService {
 
     public List<Car> getAllCars() {
         return carRepository.get();
+    }
+
+    public void updateCars(List<CarUpdate> request) throws Exception {
+       for (CarUpdate carRequest : request) {
+           carRepository.update(carRequest.getStatus(), carRequest.isAvailable(), carRequest.getId());
+       }
     }
 }

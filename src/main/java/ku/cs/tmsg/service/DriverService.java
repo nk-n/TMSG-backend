@@ -1,7 +1,6 @@
 package ku.cs.tmsg.service;
 
-import ku.cs.tmsg.dto.DriverRequest;
-import ku.cs.tmsg.entity.Car;
+import ku.cs.tmsg.dto.request.DriverCreate;
 import ku.cs.tmsg.entity.Driver;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.repository.DriverRepository;
@@ -20,8 +19,8 @@ public class DriverService {
         this.driverRepository = driverRepository;
     }
 
-    public void createDriver(List<DriverRequest> request) throws Exception {
-        for (DriverRequest driverRequest : request) {
+    public void createDriver(List<DriverCreate> request) throws Exception {
+        for (DriverCreate driverRequest : request) {
             Driver driver = new Driver();
             try {
                 driver.setTel(driverRequest.getTel());

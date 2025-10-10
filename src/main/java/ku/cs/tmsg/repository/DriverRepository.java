@@ -27,8 +27,8 @@ public class DriverRepository {
 
     public void save(Driver driver) throws Exception {
         String query = """
-                INSERT INTO รถขนส่ง (เบอร์โทร,ชื่อ,Line_ID,หมายเหตุพนักงานขับรถ,พร้อมทำงาน,สถานะพนักงาน)
-                VALUES (?,?,?,?,?,?,?)
+                INSERT INTO พนักงานขับรถ (เบอร์โทร,ชื่อ,Line_ID,หมายเหตุพนักงานขับรถ,พร้อมทำงาน,สถานะพนักงาน)
+                VALUES (?,?,?,?,?,?)
                 ON DUPLICATE KEY UPDATE
                     ชื่อ = VALUES(ชื่อ),
                     Line_ID = VALUES(Line_ID),
@@ -36,7 +36,7 @@ public class DriverRepository {
                     พร้อมทำงาน = VALUES(พร้อมทำงาน),
                     สถานะพนักงาน = VALUES(สถานะพนักงาน)
                 """;
-        int rows = jdbcTemplate.update(query, driver.getTel(), driver.getName(), driver.getLine_ID(), driver.getNote(), driver.isAvailable(), driver.getStatus());
+        int rows = jdbcTemplate.update(query, driver.getTel(), driver.getName(), driver.getLine_ID(), driver.getNote(), driver.isAvailable(), driver.getStatus().getDisplayName());
         if (rows == 0) {
             throw new DatabaseException("can't create new driver");
         }

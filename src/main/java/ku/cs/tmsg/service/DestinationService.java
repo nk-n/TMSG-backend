@@ -1,8 +1,7 @@
 package ku.cs.tmsg.service;
 
-import ku.cs.tmsg.dto.DestinationRequest;
+import ku.cs.tmsg.dto.request.DestinationCreate;
 import ku.cs.tmsg.entity.Destination;
-import ku.cs.tmsg.entity.Driver;
 import ku.cs.tmsg.repository.DestinationRepository;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +18,8 @@ public class DestinationService {
         this.destinationRepository = destinationRepository;
     }
 
-    public void createDestination(List<DestinationRequest> request) throws Exception {
-        for (DestinationRequest destinationRequest : request) {
+    public void createDestination(List<DestinationCreate> request) throws Exception {
+        for (DestinationCreate destinationRequest : request) {
             Destination destination = new Destination();
             try {
                 destination.setName(destinationRequest.getName());

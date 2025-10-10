@@ -26,7 +26,7 @@ public class DestinationRepository {
     public void save(Destination destination) throws Exception {
         String query = """
                 INSERT INTO สถานที่จัดส่งปลายทาง (จังหวัด,ภูมิภาค,พร้อมรับสินค้า,ชื่อสถานที่,ที่อยู่,ระยะทางจาก_SCBPK,ระยะเวลาที่ใช้เดินทาง_SCBPK,เส้นทาง)
-                VALUES (?,?,?,?,?,?,?)
+                VALUES (?,?,?,?,?,?,?,?)
                 ON DUPLICATE KEY UPDATE
                     จังหวัด = VALUES(จังหวัด),
                     ภูมิภาค = VALUES(ภูมิภาค),
@@ -34,7 +34,7 @@ public class DestinationRepository {
                     ที่อยู่ = VALUES(ที่อยู่),
                     ระยะทางจาก_SCBPK = VALUES(ระยะทางจาก_SCBPK),
                     ระยะเวลาที่ใช้เดินทาง_SCBPK = VALUES(ระยะเวลาที่ใช้เดินทาง_SCBPK),
-                    เส้นทาง = VALUES(เส้นทาง),
+                    เส้นทาง = VALUES(เส้นทาง)
                 """;
         int rows = jdbcTemplate.update(query, destination.getProvince(), destination.getRegion(),destination.isAvailable(), destination.getName(), destination.getAddress(), destination.getDistance(), destination.getTimeUse(), destination.getRoute());
         if (rows == 0) {
