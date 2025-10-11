@@ -1,4 +1,4 @@
-package ku.cs.tmsg.dto;
+package ku.cs.tmsg.dto.request;
 
 import lombok.Data;
 

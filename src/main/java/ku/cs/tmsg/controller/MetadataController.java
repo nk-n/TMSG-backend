@@ -1,13 +1,10 @@
 package ku.cs.tmsg.controller;
 
-import ku.cs.tmsg.dto.CarRequest;
-import ku.cs.tmsg.dto.DestinationRequest;
-import ku.cs.tmsg.dto.DriverRequest;
+import ku.cs.tmsg.dto.request.*;
 import ku.cs.tmsg.dto.response.ApiResponse;
 import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.Destination;
 import ku.cs.tmsg.entity.Driver;
-import ku.cs.tmsg.exception.NotFoundException;
 import ku.cs.tmsg.service.CarService;
 import ku.cs.tmsg.service.DestinationService;
 import ku.cs.tmsg.service.DriverService;
@@ -30,10 +27,10 @@ public class MetadataController {
     private DriverService driverService;
 
     @PostMapping("/cars")
-    public ResponseEntity<String> SaveCar(@RequestBody List<CarRequest> request) {
+    public ResponseEntity<String> SaveCar(@RequestBody List<CarCreate> request) {
         try {
             carService.createCar(request);
-            return ResponseEntity.status(HttpStatus.OK).body("create car success");
+            return ResponseEntity.status(HttpStatus.CREATED).body("create car success");
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -42,10 +39,10 @@ public class MetadataController {
     }
 
     @PostMapping("/drivers")
-    public ResponseEntity<String> SaveDriver(@RequestBody List<DriverRequest> request) {
+    public ResponseEntity<String> SaveDriver(@RequestBody List<DriverCreate> request) {
         try {
             driverService.createDriver(request);
-            return ResponseEntity.status(HttpStatus.OK).body("create destination success");
+            return ResponseEntity.status(HttpStatus.CREATED).body("create driver success");
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -54,10 +51,10 @@ public class MetadataController {
     }
 
     @PostMapping("/destinations")
-    public ResponseEntity<String> SaveDestination(@RequestBody List<DestinationRequest> request) {
+    public ResponseEntity<String> SaveDestination(@RequestBody List<DestinationCreate> request) {
         try {
             destinationService.createDestination(request);
-            return ResponseEntity.status(HttpStatus.OK).body("create destination success");
+            return ResponseEntity.status(HttpStatus.CREATED).body("create destination success");
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -92,6 +89,26 @@ public class MetadataController {
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<List<Destination>>("success get destinations", destination));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>(e.getMessage(), null));
+        }
+    }
+
+    @PutMapping("/car")
+    public ResponseEntity<String> UpdateCarData(@RequestBody List<CarUpdate> request) {
+        try {
+            carService.updateCars(request);
+            return ResponseEntity.status(HttpStatus.OK).body("update car success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("update item failed : " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/driver")
+    public ResponseEntity<String> UpdateDriverData(@RequestBody List<DriverUpdate> request) {
+        try {
+            driverService.updateDriver(request);
+            return ResponseEntity.status(HttpStatus.OK).body("update driver success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("update item failed: " + e.getMessage());
         }
     }
 }

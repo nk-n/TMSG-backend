@@ -1,6 +1,6 @@
 package ku.cs.tmsg.service;
 
-import ku.cs.tmsg.dto.NewUserRequest;
+import ku.cs.tmsg.dto.request.NewUserRequest;
 import ku.cs.tmsg.dto.response.UserResponse;
 import ku.cs.tmsg.entity.User;
 import ku.cs.tmsg.repository.UserRepository;
@@ -51,7 +51,7 @@ public class UserService {
         user.setPassword(encoder.encode(request.getPassword()));
         user.setName(request.getName());
         user.setRole("ROLE_USER");
-        user.setStatus(1);
+        user.setStatus(true);
         user.setPhone(request.getPhone());
         userRepository.save(user);
     }

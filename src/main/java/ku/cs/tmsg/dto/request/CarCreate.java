@@ -1,9 +1,9 @@
-package ku.cs.tmsg.dto;
+package ku.cs.tmsg.dto.request;
 
 import lombok.Data;
 
 @Data
-public class CarRequest {
+public class CarCreate {
     private String status;
     private String license;
     private String id;
