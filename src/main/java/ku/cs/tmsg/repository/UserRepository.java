@@ -54,6 +54,22 @@ public class UserRepository {
         }
     }
 
+    public int editData(String id, String name, String phone, String password) {
+        String query = """
+        UPDATE พนักงานจัดส่ง 
+            SET ชื่อ = ?, 
+                เบอร์โทร = ?,
+                รหัสผ่าน = ?
+            WHERE id = ?
+            """;
+
+        int status = jdbcTemplate.update(query, name, phone, password, id);
+        if (status == 0) {
+            throw new DataAccessException("f user") {};
+        }
+        return status;
+    }
+
     public User softDelete(String id) {
         User user = findByUsername(id);
         if (user == null || !user.isStatus()) {

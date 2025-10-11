@@ -73,4 +73,44 @@ public class UserService {
         }
     }
 
+    public UserResponse update(String id, String name, String phone, String password) {
+        try {
+            User user = userRepository.findByUsername(id);
+
+            if (user == null || !user.isStatus()) {
+                throw new UsernameNotFoundException("No such user");
+            }
+
+
+            if (name == null || name.isEmpty() || name.equals(user.getName())) {
+                name = user.getName();
+            }
+
+            if (phone == null || phone.isEmpty() || phone.equals(user.getPhone())) {
+                phone = user.getPhone();
+            }
+
+            if (password == null || password.isEmpty()) {
+                password = user.getPassword();
+            } else {
+                password = encoder.encode(password);
+            }
+
+            int status = userRepository.editData(id, name, phone, password);
+            if (status != 1) {
+                throw new DataAccessException("fail to edit data") {
+                };
+            }
+            user.setPhone(phone);
+            user.setName(name);
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(user.getId());
+            userResponse.setName(user.getName());
+            userResponse.setPhone(user.getPhone());
+            return  userResponse;
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage()){};
+        }
+    }
+
 }

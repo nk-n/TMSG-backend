@@ -1,9 +1,9 @@
 package ku.cs.tmsg.controller;
 
+import ku.cs.tmsg.dto.DeleteUserRequest;
 import ku.cs.tmsg.dto.EditUserRequest;
 import ku.cs.tmsg.dto.response.ApiResponse;
 import ku.cs.tmsg.dto.response.UserResponse;
-import ku.cs.tmsg.entity.User;
 import ku.cs.tmsg.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -36,12 +36,23 @@ public class UserController {
     }
 
     @PutMapping("/delete")
-    public ResponseEntity<ApiResponse<UserResponse>> deleteUser(@RequestBody EditUserRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> deleteUser(@RequestBody DeleteUserRequest request) {
         try {
             UserResponse userResponses = userService.delete(request.getId());
             return ResponseEntity.ok(new ApiResponse<>("OK", userResponses));
         } catch (DataAccessException | UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>("Error: failed to delete user", null));
+        }
+    }
+
+    @PutMapping("/edit")
+    public ResponseEntity<ApiResponse<UserResponse>> editUser(@RequestBody EditUserRequest request) {
+        try {
+            UserResponse response = userService.update(request.getId(), request.getName(), request.getPhone(), request.getPassword());
+            return ResponseEntity.ok(new ApiResponse<>("OK", response));
+        } catch (DataAccessException | UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>("Error: " + e.getMessage(), null));
+
         }
     }
 }
