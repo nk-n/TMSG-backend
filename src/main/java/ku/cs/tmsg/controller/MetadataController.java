@@ -111,4 +111,54 @@ public class MetadataController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("update item failed: " + e.getMessage());
         }
     }
+
+    @PutMapping("/car/note")
+    public ResponseEntity<String> UpdateCarNote(@RequestBody NoteUpdate request) {
+        try {
+            carService.updateNoteCar(request);
+            return ResponseEntity.status(HttpStatus.OK).body("update car note success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("update car note failed: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/driver/note")
+    public ResponseEntity<String> UpdateDriverNote(@RequestBody NoteUpdate request) {
+        try {
+            driverService.updateNoteDriver(request);
+            return ResponseEntity.status(HttpStatus.OK).body("update driver note success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("update driver note failed: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/car/delete/{id}")
+    public ResponseEntity<String> DeleteCar(@PathVariable String id) {
+        try {
+            carService.deleteCar(id);
+            return ResponseEntity.status(HttpStatus.OK).body("delete car success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("delete car failed: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/driver/delete/{id}")
+    public ResponseEntity<String> DeleteDriver(@PathVariable String id) {
+        try {
+            driverService.deleteDriver(id);
+            return ResponseEntity.status(HttpStatus.OK).body("delete driver success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("delete driver failed: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/destination/delete/{id}")
+    public ResponseEntity<String> DeleteDestination(@PathVariable String id) {
+        try {
+            destinationService.deleteDestination(id);
+            return ResponseEntity.status(HttpStatus.OK).body("delete destination success");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("delete destination failed: " + e.getMessage());
+        }
+    }
 }

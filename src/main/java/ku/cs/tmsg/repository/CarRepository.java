@@ -77,4 +77,24 @@ public class CarRepository {
         jdbcTemplate.update(query, status.getDisplayName(), available, id);
     }
 
+    public void updateNote(String id, String note) throws Exception {
+        String query = """
+                UPDATE รถขนส่ง 
+                SET 
+                    หมายเหตุรถ = ?
+                WHERE เบอร์รถ = ?
+                """;
+        jdbcTemplate.update(query, note, id);
+    }
+
+    public void delete(String id) throws Exception {
+        String query = """
+                UPDATE รถขนส่ง 
+                SET 
+                    พร้อมขนส่ง = ?
+                WHERE เบอร์รถ = ?
+                """;
+        jdbcTemplate.update(query, false, id);
+    }
+
 }

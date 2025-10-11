@@ -99,4 +99,24 @@ public class DriverRepository {
         jdbcTemplate.update(query, status.getDisplayName(), available, tel);
     }
 
+    public void updateNote(String tel, String note) throws Exception {
+        String query = """
+                UPDATE พนักงานขับรถ 
+                SET 
+                    หมายเหตุพนักงานขับรถ = ?
+                WHERE เบอร์โทร = ?
+                """;
+        jdbcTemplate.update(query, note, tel);
+    }
+
+    public void delete(String tel) throws Exception {
+        String query = """
+                UPDATE พนักงานขับรถ 
+                SET 
+                    พร้อมทำงาน = ?
+                WHERE เบอร์โทร = ?
+                """;
+        jdbcTemplate.update(query, false, tel);
+    }
+
 }

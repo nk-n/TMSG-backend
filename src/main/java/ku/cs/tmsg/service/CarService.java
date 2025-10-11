@@ -2,6 +2,7 @@ package ku.cs.tmsg.service;
 
 import ku.cs.tmsg.dto.request.CarCreate;
 import ku.cs.tmsg.dto.request.CarUpdate;
+import ku.cs.tmsg.dto.request.NoteUpdate;
 import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.entity.enums.CarType;
@@ -43,5 +44,13 @@ public class CarService {
        for (CarUpdate carRequest : request) {
            carRepository.update(carRequest.getStatus(), carRequest.isAvailable(), carRequest.getId());
        }
+    }
+
+    public void updateNoteCar(NoteUpdate request) throws Exception {
+        carRepository.updateNote(request.getId(), request.getNote());
+    }
+
+    public void deleteCar(String id) throws Exception {
+        carRepository.delete(id);
     }
 }

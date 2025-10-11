@@ -64,4 +64,14 @@ public class DestinationRepository {
         }
     }
 
+    public void delete(String name) throws Exception {
+        String query = """
+                UPDATE สถานที่จัดส่งปลายทาง 
+                SET 
+                    พร้อมรับสินค้า = ?
+                WHERE ชื่อสถานที่ = ?
+                """;
+        jdbcTemplate.update(query, false, name);
+    }
+
 }
