@@ -1,5 +1,6 @@
 package ku.cs.tmsg.controller;
 
+import ku.cs.tmsg.dto.EditUserRequest;
 import ku.cs.tmsg.dto.response.ApiResponse;
 import ku.cs.tmsg.dto.response.UserResponse;
 import ku.cs.tmsg.entity.User;
@@ -8,8 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
@@ -27,7 +31,17 @@ public class UserController {
             List<UserResponse> userResponses = userService.getAll();
             return ResponseEntity.ok(new ApiResponse<>("OK", userResponses));
         } catch (DataAccessException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>("Error" + e.getMessage(), null));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>("Error: can't access data", null));
+        }
+    }
+
+    @PutMapping("/delete")
+    public ResponseEntity<ApiResponse<UserResponse>> deleteUser(@RequestBody EditUserRequest request) {
+        try {
+            UserResponse userResponses = userService.delete(request.getId());
+            return ResponseEntity.ok(new ApiResponse<>("OK", userResponses));
+        } catch (DataAccessException | UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>("Error: failed to delete user", null));
         }
     }
 }

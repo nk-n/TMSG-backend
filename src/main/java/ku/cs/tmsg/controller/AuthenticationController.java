@@ -1,11 +1,14 @@
 package ku.cs.tmsg.controller;
 
+import ku.cs.tmsg.dto.response.ApiResponse;
 import ku.cs.tmsg.dto.request.LoginRequest;
 import ku.cs.tmsg.dto.request.NewUserRequest;
 import ku.cs.tmsg.security.JwtUtil;
 import ku.cs.tmsg.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -42,18 +45,21 @@ public class AuthenticationController {
 
 
     @PostMapping("/signin")
-    public String authenticateUser(@RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<String>> authenticateUser(@RequestBody LoginRequest request) {
 
-
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
-        UserDetails userDetails =
-                (UserDetails) authentication.getPrincipal();
-        return jwtUtils.generateToken(userDetails.getUsername());
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+            UserDetails userDetails =
+                    (UserDetails) authentication.getPrincipal();
+            return ResponseEntity.ok(new ApiResponse<String>("OK", jwtUtils.generateToken(userDetails.getUsername())));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.badRequest().body(new ApiResponse<String>("bad credential","invalid credentials®" ));
+        }
     }
 
 }

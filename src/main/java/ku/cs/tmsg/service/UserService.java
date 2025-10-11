@@ -6,6 +6,8 @@ import ku.cs.tmsg.entity.User;
 import ku.cs.tmsg.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -54,6 +56,21 @@ public class UserService {
         user.setStatus(true);
         user.setPhone(request.getPhone());
         userRepository.save(user);
+    }
+
+    public UserResponse delete(String id) {
+        try {
+            User delUser = userRepository.softDelete(id);
+            UserResponse userResponse = new UserResponse();
+            userResponse.setId(delUser.getId());
+            userResponse.setName(delUser.getName());
+            userResponse.setPhone(delUser.getPhone());
+            return  userResponse;
+        } catch (UsernameNotFoundException e) {
+            throw new UsernameNotFoundException(e.getMessage());
+        } catch (DataAccessException e) {
+            throw new DataAccessException(e.getMessage()){};
+        }
     }
 
 }

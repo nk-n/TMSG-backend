@@ -105,6 +105,8 @@ public class SecurityConfig {
 
                                 // Role-based endpoints
                                 .requestMatchers(HttpMethod.POST, "/api/auth/new-user").hasAnyAuthority("ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/users/all").hasAnyAuthority("ROLE_ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/users/delete").hasAnyAuthority("ROLE_ADMIN")
 
                                 .requestMatchers("/api/metadata/**").permitAll()
 

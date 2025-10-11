@@ -6,6 +6,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
@@ -51,6 +52,20 @@ public class UserRepository {
             throw new DataAccessException(e.getMessage()) {
             };
         }
+    }
+
+    public User softDelete(String id) {
+        User user = findByUsername(id);
+        if (user == null || !user.isStatus()) {
+            throw new UsernameNotFoundException("No such user");
+        }
+
+        String query = "UPDATE `พนักงานจัดส่ง` SET `พร้อมทำงาน` = ? WHERE `id` = ?";
+        int status = jdbcTemplate.update(query, false, id);
+        if (status == 0) {
+            throw new DataAccessException("failed to delete user") {};
+        }
+        return user;
     }
 
     class UserMapper implements RowMapper<User> {
