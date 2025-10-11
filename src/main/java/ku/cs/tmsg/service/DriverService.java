@@ -3,6 +3,7 @@ package ku.cs.tmsg.service;
 import ku.cs.tmsg.dto.request.CarUpdate;
 import ku.cs.tmsg.dto.request.DriverCreate;
 import ku.cs.tmsg.dto.request.DriverUpdate;
+import ku.cs.tmsg.dto.request.NoteUpdate;
 import ku.cs.tmsg.entity.Driver;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.repository.DriverRepository;
@@ -46,5 +47,13 @@ public class DriverService {
         for (DriverUpdate driverRequest : request) {
             driverRepository.update(driverRequest.getStatus(), driverRequest.isAvailable(), driverRequest.getTel());
         }
+    }
+
+    public void updateNoteDriver(NoteUpdate request) throws Exception {
+        driverRepository.updateNote(request.getId(), request.getNote());
+    }
+
+    public void deleteDriver(String id) throws Exception {
+        driverRepository.delete(id);
     }
 }

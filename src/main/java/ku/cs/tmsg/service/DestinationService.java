@@ -40,4 +40,8 @@ public class DestinationService {
     public List<Destination> getAllDestination() {
         return destinationRepository.get();
     }
+
+    public void deleteDestination(String name) throws Exception {
+        destinationRepository.delete(name);
+    }
 }
