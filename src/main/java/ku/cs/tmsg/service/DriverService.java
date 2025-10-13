@@ -4,9 +4,12 @@ import ku.cs.tmsg.dto.request.CarUpdate;
 import ku.cs.tmsg.dto.request.DriverCreate;
 import ku.cs.tmsg.dto.request.DriverUpdate;
 import ku.cs.tmsg.dto.request.NoteUpdate;
+import ku.cs.tmsg.dto.response.DriverDataResponse;
 import ku.cs.tmsg.entity.Driver;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
+import ku.cs.tmsg.exception.NotFoundException;
 import ku.cs.tmsg.repository.DriverRepository;
+import ku.cs.tmsg.security.JwtUtil;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,11 +19,14 @@ import java.util.List;
 @Service
 public class DriverService {
     private DriverRepository driverRepository;
+    private JwtUtil jwtUtil;
 
     @Autowired
-    public DriverService(DriverRepository driverRepository) {
+    public DriverService(DriverRepository driverRepository, JwtUtil jwtUtil) {
         this.driverRepository = driverRepository;
+        this.jwtUtil = jwtUtil;
     }
+
 
     public void createDriver(List<DriverCreate> request) throws Exception {
         for (DriverCreate driverRequest : request) {
@@ -41,6 +47,19 @@ public class DriverService {
 
     public List<Driver> getAllDrivers() {
         return driverRepository.get();
+    }
+
+    public DriverDataResponse getDriverData(String jwt) throws NotFoundException {
+        DriverDataResponse driverDataResponse = new DriverDataResponse();
+        String userID = jwtUtil.getUserIDFromToken(jwt);
+        Driver driver = driverRepository.findByID(userID);
+        if (driver == null) {
+            throw new NotFoundException("User not found. Token might be expired.");
+        }
+        driverDataResponse.setName(driver.getName());
+        driverDataResponse.setPhone(driver.getTel());
+        driverDataResponse.setStatus(driver.isAvailable() ? "พร้อมรับงาน" : "ไม่พร้อมรับงาน");
+        return driverDataResponse;
     }
 
     public void updateDriver(List<DriverUpdate> request) throws Exception {
