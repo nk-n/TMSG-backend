@@ -110,6 +110,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.PUT, "/api/users/edit").hasAnyAuthority("ROLE_ADMIN")
 
                                 .requestMatchers("/api/metadata/**").permitAll()
+                                .requestMatchers("/api/order/**").permitAll()
 
 
 
