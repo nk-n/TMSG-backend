@@ -1,15 +1,25 @@
 package ku.cs.tmsg.repository;
 
 import jakarta.transaction.Transactional;
+import ku.cs.tmsg.dto.response.OrderDeliveryStatusResponse;
+import ku.cs.tmsg.dto.response.OrderDriverResponse;
+import ku.cs.tmsg.dto.response.OrderResponse;
+import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.Driver;
 import ku.cs.tmsg.entity.Order;
+import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
+import ku.cs.tmsg.entity.enums.CarType;
+import ku.cs.tmsg.entity.enums.CarWeight;
 import ku.cs.tmsg.exception.DatabaseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.util.Objects;
-import java.util.UUID;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 @Repository
 public class OrderRepository {
@@ -55,8 +65,81 @@ public class OrderRepository {
         } finally {
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=1");
         }
-
-
-
     }
+
+    public List<OrderResponse> get(String order_status) {
+        String query = """
+                SELECT `เบอร์รถ`, d.`order_id`, `หมายเหตุ`, `เวลาที่ต้องเสร็จ`, `สถานะออเดอร์`, `ปลายทาง`, `จุดดรอป`, `ปริมาณแก๊ส`, `ปริมาณแก๊สที่ส่งให้ลูกค้า`, driver.`ชื่อ`, driver.`เบอร์โทร`, `เวลาเข้าโหลด`, dest.`ระยะเวลาที่ใช้เดินทาง_SCBPK`
+                FROM `การจัดส่ง` as d
+                JOIN `ออเดอร์` as o ON o.order_id = d.order_id
+                JOIN `พนักงานขับรถ` as driver ON d.เบอร์โทร = driver.`เบอร์โทร`
+                JOIN `สถานที่จัดส่งปลายทาง` as dest ON dest.`ชื่อสถานที่` = o.`ปลายทาง`
+                WHERE `สถานะออเดอร์` = ?
+                ORDER BY o.`เวลาที่ต้องเสร็จ`
+                """;
+        List<OrderResponse> orders = jdbcTemplate.query(query, new OrderRepository.OrderResponseExtractor(), order_status);
+
+        String queryDeliveryStatus = """
+                SELECT timestamp_status, `สถานะ`
+                FROM `ประวัติสถานะ`
+                WHERE order_id = ?
+                """;
+        if (orders != null) {
+            for (OrderResponse orderResponse : orders) {
+                orderResponse.setDelivery_status(new ArrayList<>());
+                List<OrderDeliveryStatusResponse> statusList = jdbcTemplate.query(queryDeliveryStatus, new OrderRepository.OrderDeliveryStatusMapper(), orderResponse.getOrder_id());
+                orderResponse.getDelivery_status().addAll(statusList);
+            }
+        }
+
+        return orders;
+    }
+
+    class OrderDeliveryStatusMapper implements RowMapper<OrderDeliveryStatusResponse> {
+        @Override
+        public OrderDeliveryStatusResponse mapRow(ResultSet rs, int rowNum) throws SQLException {
+            OrderDeliveryStatusResponse status = new OrderDeliveryStatusResponse();
+            status.setStatus(rs.getString("สถานะ"));
+            status.setTimestamp(rs.getString("timestamp_status"));
+            return status;
+        }
+    }
+
+    public class OrderResponseExtractor implements ResultSetExtractor<List<OrderResponse>> {
+
+        @Override
+        public List<OrderResponse> extractData(ResultSet rs) throws SQLException {
+            Map<String, OrderResponse> orderMap = new LinkedHashMap<>();
+
+            while (rs.next()) {
+                String orderId = rs.getString("order_id");
+                OrderResponse order = orderMap.get(orderId);
+
+                if (order == null) {
+                    order = new OrderResponse();
+                    order.setOrder_id(orderId);
+                    order.setCar_id(rs.getString("เบอร์รถ"));
+                    order.setNote(rs.getString("หมายเหตุ"));
+                    order.setDeadline(rs.getString("เวลาที่ต้องเสร็จ"));
+                    order.setLoad_time(rs.getString("เวลาเข้าโหลด"));
+                    order.setOrder_status(rs.getString("สถานะออเดอร์"));
+                    order.setDestination(rs.getString("ปลายทาง"));
+                    order.setDrop(rs.getInt("จุดดรอป"));
+                    order.setTime_use(rs.getInt("ระยะเวลาที่ใช้เดินทาง_SCBPK"));
+                    order.setGas_amount(rs.getInt("ปริมาณแก๊ส"));
+                    order.setGas_send(rs.getInt("ปริมาณแก๊สที่ส่งให้ลูกค้า"));
+                    order.setDrivers(new ArrayList<>());
+                    orderMap.put(orderId, order);
+                }
+
+                OrderDriverResponse driver = new OrderDriverResponse();
+                driver.setName(rs.getString("ชื่อ"));
+                driver.setTel(rs.getString("เบอร์โทร"));
+                order.getDrivers().add(driver);
+            }
+
+            return new ArrayList<>(orderMap.values());
+        }
+    }
+
 }

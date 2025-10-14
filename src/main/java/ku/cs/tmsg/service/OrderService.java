@@ -2,6 +2,7 @@ package ku.cs.tmsg.service;
 
 import ku.cs.tmsg.dto.request.CarCreate;
 import ku.cs.tmsg.dto.request.OrderCreate;
+import ku.cs.tmsg.dto.response.OrderResponse;
 import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.Order;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
@@ -41,5 +42,10 @@ public class OrderService {
 
             orderRepository.save(order, orderCreate.getCar_id(), orderCreate.getTel1(), orderCreate.getTel2());
         }
+    }
+
+
+    public List<OrderResponse> getOrder(String order_status) {
+        return orderRepository.get(order_status);
     }
 }
