@@ -10,7 +10,9 @@ import ku.cs.tmsg.entity.Order;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.entity.enums.CarType;
 import ku.cs.tmsg.entity.enums.CarWeight;
+import ku.cs.tmsg.entity.enums.OrderStatus;
 import ku.cs.tmsg.exception.DatabaseException;
+import ku.cs.tmsg.service.DBResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -18,16 +20,19 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
 @Repository
 public class OrderRepository {
     private JdbcTemplate jdbcTemplate;
+    private DBResultUtils dbResultUtils;
 
     @Autowired
-    public OrderRepository(JdbcTemplate jdbcTemplate) {
+    public OrderRepository(JdbcTemplate jdbcTemplate, DBResultUtils dbResultUtils) {
         this.jdbcTemplate = jdbcTemplate;
+        this.dbResultUtils = dbResultUtils;
     }
 
     @Transactional
@@ -95,6 +100,28 @@ public class OrderRepository {
         return orders;
     }
 
+    public List<Order> getNewOrder(String phone) {
+        String query = """
+            SELECT
+              order_id,
+              ต้นทาง,
+              หมายเหตุ,
+              ปริมาณแก๊ส,
+              เวลาเข้าโหลด,
+              เวลาที่ต้องเสร็จ,
+              จุดดรอป,
+              ปลายทาง,
+              ลำดับเที่ยว
+            FROM ออเดอร์
+            WHERE ลำดับเที่ยว =
+                (SELECT o.ลำดับเที่ยว FROM ออเดอร์ AS o
+                INNER JOIN การจัดส่ง AS d
+                ON o.order_id = d.order_id
+                WHERE d.เบอร์โทร = ? AND o.สถานะออเดอร์ = 'รอรับงาน' ORDER BY o.เวลาเข้าโหลด ASC LIMIT 1)
+            """;
+        return jdbcTemplate.query(query, new OrderRepository.OrderMapper(), phone);
+    }
+
     class OrderDeliveryStatusMapper implements RowMapper<OrderDeliveryStatusResponse> {
         @Override
         public OrderDeliveryStatusResponse mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -139,6 +166,52 @@ public class OrderRepository {
             }
 
             return new ArrayList<>(orderMap.values());
+        }
+    }
+
+
+    private class OrderMapper implements RowMapper<Order> {
+        @Override
+        public Order mapRow(ResultSet rs, int rowNum) throws SQLException {
+            Order order = new Order();
+            Set<String> columnNames = dbResultUtils.getColumnNames(rs);
+            if (columnNames.contains("order_id")) {
+                order.setId(rs.getString("order_id"));
+            }
+            if (columnNames.contains("ต้นทาง")) {
+                order.setSource(rs.getString("ต้นทาง"));
+            }
+            if (columnNames.contains("สถานะออเดอร์")) {
+                order.setStatus(OrderStatus.fromLabel(rs.getString("สถานะออเดอร์")));
+            }
+            if (columnNames.contains("หมายเหตุ")) {
+                order.setNote(rs.getString("หมายเหตุ"));
+            }
+            if (columnNames.contains("order_date")) {
+                order.setOrder_date(rs.getDate("order_date"));
+            }
+            if (columnNames.contains("ปริมาณแก๊ส")) {
+                order.setGas_amount(rs.getInt("ปริมาณแก๊ส"));
+            }
+            if (columnNames.contains("ปริมาณแก๊สที่ส่งให้ลูกค้า")) {
+                order.setGas_send(rs.getInt("ปริมาณแก๊สที่ส่งให้ลูกค้า"));
+            }
+            if (columnNames.contains("เวลาเข้าโหลด")) {
+                order.setLoad_time(rs.getDate("เวลาเข้าโหลด"));
+            }
+            if (columnNames.contains("เวลาที่ต้องเสร็จ")) {
+                order.setDeadline(rs.getDate("เวลาที่ต้องเสร็จ"));
+            }
+            if (columnNames.contains("จุดดรอป")) {
+                order.setDrop(rs.getInt("จุดดรอป"));
+            }
+            if (columnNames.contains("ปลายทาง")) {
+                order.setDestination(rs.getString("ปลายทาง"));
+            }
+            if (columnNames.contains("ลำดับเที่ยว")) {
+                order.setGroupID(rs.getInt("ลำดับเที่ยว"));
+            }
+            return order;
         }
     }
 

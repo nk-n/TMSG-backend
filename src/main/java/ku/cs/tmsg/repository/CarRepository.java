@@ -7,6 +7,7 @@ import ku.cs.tmsg.entity.enums.CarType;
 import ku.cs.tmsg.entity.enums.CarWeight;
 import ku.cs.tmsg.exception.DatabaseException;
 import ku.cs.tmsg.exception.NotFoundException;
+import ku.cs.tmsg.service.DBResultUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -15,14 +16,17 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public class CarRepository {
     private JdbcTemplate jdbcTemplate;
+    private DBResultUtils dbResultUtils;
 
     @Autowired
-    public CarRepository(JdbcTemplate jdbcTemplate) {
+    public CarRepository(JdbcTemplate jdbcTemplate, DBResultUtils dbResultUtils) {
         this.jdbcTemplate = jdbcTemplate;
+        this.dbResultUtils = dbResultUtils;
     }
 
     public void save(Car car) throws Exception {
@@ -50,18 +54,45 @@ public class CarRepository {
         return  cars;
     }
 
+    public Car getCarByOrderID(String orderID) {
+        String query = """
+                SELECT c.เบอร์รถ, c.น้ำหนัก FROM รถขนส่ง AS c INNER JOIN
+                การจัดส่ง AS d ON c.เบอร์รถ = d.เบอร์รถ INNER JOIN
+                ออเดอร์ AS o ON d.order_id = o.order_id
+                WHERE o.order_id = ?
+                """;
+        return jdbcTemplate.query(query, new CarMapper(), orderID).getFirst();
+    }
+
     class CarMapper implements RowMapper<Car> {
         @Override
         public Car mapRow(ResultSet rs, int rowNum) throws SQLException {
             Car car = new Car();
-            car.setStatus(CarAndDriverStatus.fromLabel(rs.getString("สถานะรถ")));
-            car.setWeight(CarWeight.fromLabel(rs.getString("น้ำหนัก")));
-            car.setType(CarType.fromLabel(rs.getString("ประเภทรถ")));
-            car.setAvailable(rs.getBoolean("พร้อมขนส่ง"));
-            car.setLicense(rs.getString("ทะเบียนรถ"));
-            car.setId(rs.getString("เบอร์รถ"));
-            car.setNote(rs.getString("หมายเหตุรถ"));
-            String license = rs.getString("ทะเบียนรถ");
+            Set<String> columnNames = dbResultUtils.getColumnNames(rs);
+            if (columnNames.contains("สถานะรถ")) {
+                car.setStatus(CarAndDriverStatus.fromLabel(rs.getString("สถานะรถ")));
+            }
+            if (columnNames.contains("น้ำหนัก")) {
+                car.setWeight(CarWeight.fromLabel(rs.getString("น้ำหนัก")));
+            }
+            if (columnNames.contains("ประเภทรถ")) {
+                car.setType(CarType.fromLabel(rs.getString("ประเภทรถ")));
+            }
+            if (columnNames.contains("พร้อมขนส่ง")) {
+                car.setAvailable(rs.getBoolean("พร้อมขนส่ง"));
+            }
+            if (columnNames.contains("ทะเบียนรถ")) {
+                car.setLicense(rs.getString("ทะเบียนรถ"));
+            }
+            if (columnNames.contains("เบอร์รถ")) {
+                car.setId(rs.getString("เบอร์รถ"));
+            }
+            if (columnNames.contains("หมายเหตุรถ")) {
+                car.setNote(rs.getString("หมายเหตุรถ"));
+            }
+            if (columnNames.contains("ทะเบียนรถ")) {
+                car.setLicense(rs.getString("ทะเบียนรถ"));
+            }
             return car;
         }
     }

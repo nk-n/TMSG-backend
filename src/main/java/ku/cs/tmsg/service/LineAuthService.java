@@ -47,8 +47,10 @@ public class LineAuthService {
 
             String userId = jwtUtil.getUserIDFromToken(idToken);
 
+            Driver user = driverRepository.findByID(userId);
+
             // check user
-            if (!driverRepository.isExistsByID(userId)) {
+            if (user == null) {
                 throw new DriverNotFoundException("User does not exist");
             }
 
@@ -65,7 +67,7 @@ public class LineAuthService {
 
 
             // issue our own JWT.
-            String appJwt = jwtUtil.generateToken(userId);
+            String appJwt = jwtUtil.generateLineToken(user.getLine_ID(), user.getTel());
             return Map.of("jwt", appJwt, "user", userId, "status", "OK");
 
         } catch (DriverNotFoundException e){

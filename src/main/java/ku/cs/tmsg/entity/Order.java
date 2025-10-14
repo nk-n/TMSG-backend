@@ -38,4 +38,6 @@ public class Order {
     private String delivery_id;
     @Column(name="ชื่อสถานที่")
     private String destination;
+    @Column(name="ลำดับเที่ยว")
+    private int groupID;
 }

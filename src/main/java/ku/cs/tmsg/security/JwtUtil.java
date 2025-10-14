@@ -48,6 +48,17 @@ public class JwtUtil {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    public String generateLineToken(String username, String phone) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() +
+                        jwtExpirationMs))
+                .claim("phone", phone)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
     // Get username from JWT token
     public String getUsernameFromToken(String token) {
         return Jwts.parser()
@@ -80,5 +91,10 @@ public class JwtUtil {
     public String getUserIDFromToken(String token) {
         DecodedJWT jwt = JWT.decode(token);
         return jwt.getSubject();
+    }
+
+    public String getPhoneFromLineToken(String token) {
+        DecodedJWT jwt = JWT.decode(token);
+        return jwt.getClaim("phone").asString();
     }
 }
