@@ -71,6 +71,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers(HttpMethod.GET,"/api/line/**").hasAnyAuthority("ROLE_DRIVER")
+                        .requestMatchers(HttpMethod.POST,"/api/line/task/status/update").hasAnyAuthority("ROLE_DRIVER")
 
                         // All other endpoints require authentication
                         .anyRequest().denyAll()
