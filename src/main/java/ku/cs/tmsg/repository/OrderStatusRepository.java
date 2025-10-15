@@ -32,6 +32,13 @@ public class OrderStatusRepository {
                 orderStatus.getOrderId()) == 1 ? orderStatus : null;
     }
 
+    public int getStatusCount(String orderID) {
+        String query = """
+                SELECT history_status_id FROM ประวัติสถานะ WHERE order_id = ?;
+                """;
+        return jdbcTemplate.query(query, new OrderStatusMapper(), orderID).size();
+    }
+
     private class OrderStatusMapper implements RowMapper<OrderStatus> {
         @Override
         public OrderStatus mapRow(ResultSet rs, int rowNum) throws SQLException {

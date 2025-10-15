@@ -37,4 +37,7 @@ public class OrderStatusService {
         return response;
     }
 
+    public int getOrderStatusCount(String orderID) {
+        return orderStatusRepository.getStatusCount(orderID);
+    }
 }
