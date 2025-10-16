@@ -112,6 +112,8 @@ public class SecurityConfig {
 
                                 .requestMatchers("/api/metadata/**").permitAll()
                                 .requestMatchers("/api/order/**").permitAll()
+                                .requestMatchers("/api/trip/**").permitAll()
+                                .requestMatchers("/api/report/**").permitAll()
 
 
 

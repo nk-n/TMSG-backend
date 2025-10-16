@@ -72,17 +72,18 @@ public class OrderRepository {
         }
     }
 
-    public List<OrderResponse> get(String order_status) {
+    public List<OrderResponse> get(String orderStatus) {
         String query = """
-                SELECT `เบอร์รถ`, d.`order_id`, `หมายเหตุ`, `เวลาที่ต้องเสร็จ`, `สถานะออเดอร์`, `ปลายทาง`, `จุดดรอป`, `ปริมาณแก๊ส`, `ปริมาณแก๊สที่ส่งให้ลูกค้า`, driver.`ชื่อ`, driver.`เบอร์โทร`, `เวลาเข้าโหลด`, dest.`ระยะเวลาที่ใช้เดินทาง_SCBPK`
+                SELECT `เบอร์รถ`, d.`order_id`, `หมายเหตุ`, `เวลาที่ต้องเสร็จ`, `สถานะออเดอร์`, `ปลายทาง`, `จุดดรอป`, `ปริมาณแก๊ส`, `ปริมาณแก๊สที่ส่งให้ลูกค้า`, driver.`ชื่อ`, driver.`เบอร์โทร`, `เวลาเข้าโหลด`, dest.`ระยะเวลาที่ใช้เดินทาง_SCBPK`, pay.trip_id, pay.`จำนวนเงิน`, dest.`ระยะทางจาก_SCBPK`
                 FROM `การจัดส่ง` as d
                 JOIN `ออเดอร์` as o ON o.order_id = d.order_id
                 JOIN `พนักงานขับรถ` as driver ON d.เบอร์โทร = driver.`เบอร์โทร`
                 JOIN `สถานที่จัดส่งปลายทาง` as dest ON dest.`ชื่อสถานที่` = o.`ปลายทาง`
+                JOIN `ค่าเที่ยว` as pay ON pay.trip_id = d.trip_id
                 WHERE `สถานะออเดอร์` = ?
                 ORDER BY o.`เวลาที่ต้องเสร็จ`
                 """;
-        List<OrderResponse> orders = jdbcTemplate.query(query, new OrderRepository.OrderResponseExtractor(), order_status);
+        List<OrderResponse> orders = jdbcTemplate.query(query, new OrderRepository.OrderResponseExtractor(), orderStatus);
 
         String queryDeliveryStatus = """
                 SELECT timestamp_status, `สถานะ`
@@ -151,10 +152,13 @@ public class OrderRepository {
                     order.setLoad_time(rs.getString("เวลาเข้าโหลด"));
                     order.setOrder_status(rs.getString("สถานะออเดอร์"));
                     order.setDestination(rs.getString("ปลายทาง"));
+                    order.setDistance(rs.getInt("ระยะทางจาก_SCBPK"));
                     order.setDrop(rs.getInt("จุดดรอป"));
                     order.setTime_use(rs.getInt("ระยะเวลาที่ใช้เดินทาง_SCBPK"));
                     order.setGas_amount(rs.getInt("ปริมาณแก๊ส"));
                     order.setGas_send(rs.getInt("ปริมาณแก๊สที่ส่งให้ลูกค้า"));
+                    order.setTrip_id(rs.getString("trip_id"));
+                    order.setMoney(rs.getDouble("จำนวนเงิน"));
                     order.setDrivers(new ArrayList<>());
                     orderMap.put(orderId, order);
                 }
@@ -167,6 +171,15 @@ public class OrderRepository {
 
             return new ArrayList<>(orderMap.values());
         }
+    }
+
+    public void updateStatus(String orderId, String status) {
+        String query = """
+                UPDATE `ออเดอร์`
+                SET `สถานะออเดอร์` = ?
+                WHERE `order_id` = ?
+                """;
+        jdbcTemplate.update(query, status, orderId);
     }
 
 

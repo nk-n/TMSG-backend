@@ -1,15 +1,10 @@
 package ku.cs.tmsg.service;
 
-import ku.cs.tmsg.dto.request.CarCreate;
 import ku.cs.tmsg.dto.request.OrderCreate;
+import ku.cs.tmsg.dto.request.OrderUpdateStatus;
 import ku.cs.tmsg.dto.response.OrderResponse;
-import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.Order;
-import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
-import ku.cs.tmsg.entity.enums.CarType;
-import ku.cs.tmsg.entity.enums.CarWeight;
 import ku.cs.tmsg.entity.enums.OrderStatus;
-import ku.cs.tmsg.repository.CarRepository;
 import ku.cs.tmsg.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,5 +42,9 @@ public class OrderService {
 
     public List<OrderResponse> getOrder(String order_status) {
         return orderRepository.get(order_status);
+    }
+
+    public void updateStatus(OrderUpdateStatus orderStatus) {
+        orderRepository.updateStatus(orderStatus.getOrder_id(), orderStatus.getStatus());
     }
 }
