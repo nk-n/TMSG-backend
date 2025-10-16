@@ -21,5 +21,10 @@ public class OrderResponse {
     private int drop;
     private int gas_send;
     private List<OrderDeliveryStatusResponse> delivery_status;
+    private int distance;
+
+    private String trip_id;
+    private double money;
+
 
 }
