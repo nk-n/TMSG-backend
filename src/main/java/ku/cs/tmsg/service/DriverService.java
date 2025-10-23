@@ -5,6 +5,7 @@ import ku.cs.tmsg.dto.request.DriverCreate;
 import ku.cs.tmsg.dto.request.DriverUpdate;
 import ku.cs.tmsg.dto.request.NoteUpdate;
 import ku.cs.tmsg.dto.response.DriverDataResponse;
+import ku.cs.tmsg.dto.response.DriverStats;
 import ku.cs.tmsg.entity.Driver;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.exception.NotFoundException;
@@ -74,5 +75,9 @@ public class DriverService {
 
     public void deleteDriver(String id) throws Exception {
         driverRepository.delete(id);
+    }
+
+    public DriverStats getDriverStats(String id, int year, int month, int day) throws Exception {
+        return driverRepository.getDriverStats(id, year, month, day);
     }
 }

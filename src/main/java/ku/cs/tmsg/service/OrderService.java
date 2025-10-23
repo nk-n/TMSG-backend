@@ -5,6 +5,7 @@ import ku.cs.tmsg.dto.request.OrderUpdateStatus;
 import ku.cs.tmsg.dto.request.UpdateSentGasWeightRequest;
 import ku.cs.tmsg.dto.response.OrderResponse;
 import ku.cs.tmsg.dto.response.UpdateSentGasWeightResponse;
+import ku.cs.tmsg.dto.response.TotalOrderStatus;
 import ku.cs.tmsg.entity.Order;
 import ku.cs.tmsg.entity.enums.OrderStatus;
 import ku.cs.tmsg.exception.DatabaseException;
@@ -56,6 +57,10 @@ public class OrderService {
 
     public List<OrderResponse> getOrder(String order_status) {
         return orderRepository.get(order_status);
+    }
+
+    public TotalOrderStatus getTotalOrderStatus() {
+        return orderRepository.getTotalOrderStatus();
     }
 
     public void updateStatus(OrderUpdateStatus orderStatus) {
