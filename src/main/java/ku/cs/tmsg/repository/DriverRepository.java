@@ -1,5 +1,6 @@
 package ku.cs.tmsg.repository;
 
+import ku.cs.tmsg.dto.response.DriverStats;
 import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.Driver;
 import ku.cs.tmsg.entity.User;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -117,6 +119,57 @@ public class DriverRepository {
                 WHERE เบอร์โทร = ?
                 """;
         jdbcTemplate.update(query, false, tel);
+    }
+
+    public DriverStats getDriverStats(String ID, int year, int month, int day) {
+        DriverStats driverStats = new DriverStats();
+        String queryDistanceDay = """
+            SELECT COALESCE(SUM(`ระยะทางจาก_SCBPK`)) as total
+            FROM `การจัดส่ง` AS d
+            JOIN `ออเดอร์` AS o ON d.order_id = o.order_id
+            JOIN `สถานที่จัดส่งปลายทาง` AS dest ON o.ปลายทาง = dest.ชื่อสถานที่
+            WHERE d.เบอร์โทร = ?
+            AND YEAR(o.order_date) = ?
+            AND MONTH(o.order_date) = ?
+            AND DAY(o.order_date) = ?
+       """;
+        String queryDistanceMonth = """
+            SELECT COALESCE(SUM(`ระยะทางจาก_SCBPK`)) as total
+            FROM `การจัดส่ง` AS d
+            JOIN `ออเดอร์` AS o ON d.order_id = o.order_id
+            JOIN `สถานที่จัดส่งปลายทาง` AS dest ON o.ปลายทาง = dest.ชื่อสถานที่
+            WHERE d.เบอร์โทร = ?
+            AND YEAR(o.order_date) = ?
+            AND MONTH(o.order_date) = ?
+       """;
+        String queryIncomeDay = """
+           SELECT COALESCE(p.จำนวนเงิน + SUM(sp.จำนวนเงิน)) 
+           FROM `การจัดส่ง` AS d
+           JOIN `ออเดอร์` AS o ON o.order_id = d.order_id
+           JOIN `ค่าเที่ยว` AS p ON d.trip_id = p.trip_id
+           JOIN `ค่าเที่ยวพิเศษ` AS sp ON sp.trip_id = p.trip_id
+           WHERE d.เบอร์โทร = ?
+           AND YEAR(o.order_date) = ?
+           AND MONTH(o.order_date) = ?
+           AND DAY(o.order_date) = ?
+           GROUP BY d.เบอร์โทร
+       """;
+        String queryIncomeMonth = """
+           SELECT COALESCE(p.จำนวนเงิน + SUM(sp.จำนวนเงิน))
+           FROM `การจัดส่ง` AS d
+           JOIN `ออเดอร์` AS o ON o.order_id = d.order_id
+           JOIN `ค่าเที่ยว` AS p ON d.trip_id = p.trip_id
+           JOIN `ค่าเที่ยวพิเศษ` AS sp ON sp.trip_id = p.trip_id
+           WHERE d.เบอร์โทร = ?
+           AND YEAR(o.order_date) = ?
+           AND MONTH(o.order_date) = ?
+           GROUP BY d.เบอร์โทร
+       """;
+        driverStats.setDistanceDeliveryDay(jdbcTemplate.queryForObject(queryDistanceDay, Integer.class ,ID, year, month, day));
+        driverStats.setDistanceDeliveryMonth(jdbcTemplate.queryForObject(queryDistanceMonth, Integer.class ,ID, year, month));
+        driverStats.setIncomeDeliveryDay(jdbcTemplate.queryForObject(queryIncomeDay, Integer.class ,ID, year, month, day));
+        driverStats.setIncomeDeliveryMonth(jdbcTemplate.queryForObject(queryIncomeMonth, Integer.class ,ID, year, month));
+        return driverStats;
     }
 
 }

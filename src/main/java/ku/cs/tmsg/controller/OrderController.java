@@ -4,6 +4,7 @@ import ku.cs.tmsg.dto.request.OrderCreate;
 import ku.cs.tmsg.dto.request.OrderUpdateStatus;
 import ku.cs.tmsg.dto.response.ApiResponse;
 import ku.cs.tmsg.dto.response.OrderResponse;
+import ku.cs.tmsg.dto.response.TotalOrderStatus;
 import ku.cs.tmsg.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,17 @@ public class OrderController {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<List<OrderResponse>>("get orders failed: " + e.getMessage(), null));
+        }
+    }
+
+    @GetMapping("/all-status")
+    public ResponseEntity<ApiResponse<TotalOrderStatus>> GetTotalOrderStatus() {
+        try {
+            TotalOrderStatus totalOrderStatus = orderService.getTotalOrderStatus();
+            return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<TotalOrderStatus>("get total order status success", totalOrderStatus));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse<>("get total order status failed: " + e.getMessage(), null));
         }
     }
 

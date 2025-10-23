@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import ku.cs.tmsg.dto.response.OrderDeliveryStatusResponse;
 import ku.cs.tmsg.dto.response.OrderDriverResponse;
 import ku.cs.tmsg.dto.response.OrderResponse;
+import ku.cs.tmsg.dto.response.TotalOrderStatus;
 import ku.cs.tmsg.entity.Car;
 import ku.cs.tmsg.entity.Driver;
 import ku.cs.tmsg.entity.Order;
@@ -256,6 +257,31 @@ public class OrderRepository {
                 order.setGroupID(rs.getInt("ลำดับเที่ยว"));
             }
             return order;
+        }
+    }
+
+    public TotalOrderStatus getTotalOrderStatus() {
+        String query = """
+                SELECT
+                  COUNT(CASE WHEN `สถานะออเดอร์` = 'รอรับงาน' THEN `order_id` END) AS `รอรับงาน`,
+                  COUNT(CASE WHEN `สถานะออเดอร์` = 'ระหว่างจัดส่งสินค้า' THEN `order_id` END) AS `ระหว่างจัดส่งสินค้า`,
+                  COUNT(CASE WHEN `สถานะออเดอร์` = 'รออนุมัติ' THEN `order_id` END) AS `รออนุมัติ`,
+                  COUNT(CASE WHEN `สถานะออเดอร์` = 'อนุมัติ' THEN `order_id` END) AS `อนุมัติ`
+                FROM `ออเดอร์`;
+                """;
+        return jdbcTemplate.query(query, new OrderTotalMapper()).getFirst();
+
+    }
+
+    private class OrderTotalMapper implements RowMapper<TotalOrderStatus> {
+        @Override
+        public TotalOrderStatus mapRow(ResultSet rs, int rowNum) throws SQLException {
+            TotalOrderStatus totalOrderStatus = new TotalOrderStatus();
+            totalOrderStatus.setTotalWaitingOrder(rs.getInt("รอรับงาน"));
+            totalOrderStatus.setTotalDeliveryOrder(rs.getInt("ระหว่างจัดส่งสินค้า"));
+            totalOrderStatus.setTotalWaitingApproveOrder(rs.getInt("รออนุมัติ"));
+            totalOrderStatus.setTotalApproveOrder(rs.getInt("อนุมัติ"));
+            return totalOrderStatus;
         }
     }
 
