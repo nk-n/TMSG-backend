@@ -2,9 +2,12 @@ package ku.cs.tmsg.service;
 
 import ku.cs.tmsg.dto.request.OrderCreate;
 import ku.cs.tmsg.dto.request.OrderUpdateStatus;
+import ku.cs.tmsg.dto.request.UpdateSentGasWeightRequest;
 import ku.cs.tmsg.dto.response.OrderResponse;
+import ku.cs.tmsg.dto.response.UpdateSentGasWeightResponse;
 import ku.cs.tmsg.entity.Order;
 import ku.cs.tmsg.entity.enums.OrderStatus;
+import ku.cs.tmsg.exception.DatabaseException;
 import ku.cs.tmsg.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,17 @@ public class OrderService {
 
             orderRepository.save(order, orderCreate.getCar_id(), orderCreate.getTel1(), orderCreate.getTel2());
         }
+    }
+
+    public UpdateSentGasWeightResponse updateSentGasWeight(UpdateSentGasWeightRequest request) throws DatabaseException {
+        int rowAffected = orderRepository.updateSentGasWeight(request.getOrderID(), request.getWeight());
+        if (rowAffected < 1) {
+            throw new DatabaseException("Can't update sent gas weight");
+        }
+        UpdateSentGasWeightResponse response = new UpdateSentGasWeightResponse();
+        response.setOrderID(request.getOrderID());
+        response.setWeight(request.getWeight());
+        return response;
     }
 
 

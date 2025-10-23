@@ -54,7 +54,7 @@ public class DestinationRepository {
 
     public Destination getByOrderID(String orderID) {
         String query = """
-                SELECT ds.ชื่อสถานที่, ds.ที่อยู่, ds.เส้นทาง FROM สถานที่จัดส่งปลายทาง AS ds INNER JOIN
+                SELECT ds.ชื่อสถานที่, ds.ที่อยู่, ds.เส้นทาง, ds.ระยะทางจาก_SCBPK FROM สถานที่จัดส่งปลายทาง AS ds INNER JOIN
                 ออเดอร์ AS o ON ds.ชื่อสถานที่ = o.ปลายทาง WHERE o.order_id = ?
                 """;
         return jdbcTemplate.query(query, new DestinationMapper(), orderID).getFirst();
@@ -80,11 +80,11 @@ public class DestinationRepository {
             if (columns.contains("ที่อยู่")) {
                 destination.setAddress(rs.getString("ที่อยู่"));
             }
-            if (columns.contains("ระยะทางจาก_SCBPK")) {
-                destination.setDistance(rs.getInt("ระยะทางจาก_SCBPK"));
+            if (columns.contains("ระยะทางจาก_scbpk")) {
+                destination.setDistance(rs.getInt("ระยะทางจาก_scbpk"));
             }
-            if (columns.contains("ระยะเวลาที่ใช้เดินทาง_SCBPK")) {
-                destination.setTimeUse(rs.getInt("ระยะเวลาที่ใช้เดินทาง_SCBPK"));
+            if (columns.contains("ระยะเวลาที่ใช้เดินทาง_scbpk")) {
+                destination.setTimeUse(rs.getInt("ระยะเวลาที่ใช้เดินทาง_scbpk"));
             }
             if (columns.contains("เส้นทาง")) {
                 destination.setRoute(rs.getString("เส้นทาง"));

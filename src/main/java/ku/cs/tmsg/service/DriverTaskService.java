@@ -36,9 +36,14 @@ public class DriverTaskService {
         this.carRepository = carRepository;
     }
 
-    public List<TaskResponse> getNewTasks(String jwt) {
+    public List<TaskResponse> getTasks(String jwt, String type) {
         String phone = jwtUtil.getPhoneFromLineToken(jwt);
-        List<Order> orders = orderRepository.getNewOrder(phone);
+        List<Order> orders;
+        if (type == "new") {
+            orders = orderRepository.getNewOrder(phone);
+        } else {
+            orders = orderRepository.getCurrentOrder(phone);
+        }
         List<TaskResponse> taskResponses = new ArrayList<>();
         for (Order order : orders) {
             TaskResponse taskResponse = new TaskResponse();
@@ -65,6 +70,7 @@ public class DriverTaskService {
             taskResponse.setDestinationName(dest.getName());
             taskResponse.setDestinationLocation(dest.getAddress());
             taskResponse.setDestinationRoute(dest.getRoute());
+            taskResponse.setDestinationDistance(dest.getDistance());
 
             taskResponses.add(taskResponse);
         }

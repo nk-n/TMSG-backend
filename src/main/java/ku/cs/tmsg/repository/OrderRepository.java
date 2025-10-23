@@ -123,6 +123,28 @@ public class OrderRepository {
         return jdbcTemplate.query(query, new OrderRepository.OrderMapper(), phone);
     }
 
+    public List<Order> getCurrentOrder(String phone) {
+        String query = """
+            SELECT
+              order_id,
+              ต้นทาง,
+              หมายเหตุ,
+              ปริมาณแก๊ส,
+              เวลาเข้าโหลด,
+              เวลาที่ต้องเสร็จ,
+              จุดดรอป,
+              ปลายทาง,
+              ลำดับเที่ยว
+            FROM ออเดอร์
+            WHERE ลำดับเที่ยว =
+                (SELECT o.ลำดับเที่ยว FROM ออเดอร์ AS o
+                INNER JOIN การจัดส่ง AS d
+                ON o.order_id = d.order_id
+                WHERE d.เบอร์โทร = ? AND o.สถานะออเดอร์ = 'ระหว่างจัดส่งสินค้า' ORDER BY o.เวลาเข้าโหลด ASC LIMIT 1)
+            """;
+        return jdbcTemplate.query(query, new OrderRepository.OrderMapper(), phone);
+    }
+
     class OrderDeliveryStatusMapper implements RowMapper<OrderDeliveryStatusResponse> {
         @Override
         public OrderDeliveryStatusResponse mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -180,6 +202,15 @@ public class OrderRepository {
                 WHERE `order_id` = ?
                 """;
         jdbcTemplate.update(query, status, orderId);
+    }
+
+    public int updateSentGasWeight(String orderId, double sentGasWeight) {
+        String query = """
+                UPDATE `ออเดอร์`
+                SET `ปริมาณแก๊สที่ส่งให้ลูกค้า` = ?
+                WHERE `order_id` = ?
+                """;
+        return jdbcTemplate.update(query, sentGasWeight, orderId);
     }
 
 

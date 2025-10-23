@@ -29,4 +29,5 @@ public class TaskResponse {
     private String destinationName;
     private String destinationLocation;
     private String destinationRoute;
+    private int destinationDistance;
 }
