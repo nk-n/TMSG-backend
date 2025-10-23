@@ -124,47 +124,62 @@ public class DriverRepository {
     public DriverStats getDriverStats(String ID, int year, int month, int day) {
         DriverStats driverStats = new DriverStats();
         String queryDistanceDay = """
-            SELECT COALESCE(SUM(`ระยะทางจาก_SCBPK`)) as total
-            FROM `การจัดส่ง` AS d
-            JOIN `ออเดอร์` AS o ON d.order_id = o.order_id
-            JOIN `สถานที่จัดส่งปลายทาง` AS dest ON o.ปลายทาง = dest.ชื่อสถานที่
-            WHERE d.เบอร์โทร = ?
-            AND YEAR(o.order_date) = ?
-            AND MONTH(o.order_date) = ?
-            AND DAY(o.order_date) = ?
-       """;
+            SELECT COALESCE((
+                SELECT SUM(`ระยะทางจาก_SCBPK`)
+                FROM `การจัดส่ง` AS d
+                JOIN `ออเดอร์` AS o ON d.order_id = o.order_id
+                JOIN `สถานที่จัดส่งปลายทาง` AS dest ON o.ปลายทาง = dest.ชื่อสถานที่
+                WHERE d.เบอร์โทร = ?
+                AND YEAR(o.order_date) = ?
+                AND MONTH(o.order_date) = ?
+                AND DAY(o.order_date) = ?
+                AND o.สถานะออเดอร์ = 'อนุมัติ'
+            ), 0) AS total
+        """;
+
         String queryDistanceMonth = """
-            SELECT COALESCE(SUM(`ระยะทางจาก_SCBPK`)) as total
-            FROM `การจัดส่ง` AS d
-            JOIN `ออเดอร์` AS o ON d.order_id = o.order_id
-            JOIN `สถานที่จัดส่งปลายทาง` AS dest ON o.ปลายทาง = dest.ชื่อสถานที่
-            WHERE d.เบอร์โทร = ?
-            AND YEAR(o.order_date) = ?
-            AND MONTH(o.order_date) = ?
-       """;
+            SELECT COALESCE((
+                SELECT SUM(`ระยะทางจาก_SCBPK`)
+                FROM `การจัดส่ง` AS d
+                JOIN `ออเดอร์` AS o ON d.order_id = o.order_id
+                JOIN `สถานที่จัดส่งปลายทาง` AS dest ON o.ปลายทาง = dest.ชื่อสถานที่
+                WHERE d.เบอร์โทร = ?
+                AND YEAR(o.order_date) = ?
+                AND MONTH(o.order_date) = ?
+                AND o.สถานะออเดอร์ = 'อนุมัติ'
+            ), 0) AS total
+        """;
+
         String queryIncomeDay = """
-           SELECT COALESCE(p.จำนวนเงิน + SUM(sp.จำนวนเงิน)) 
-           FROM `การจัดส่ง` AS d
-           JOIN `ออเดอร์` AS o ON o.order_id = d.order_id
-           JOIN `ค่าเที่ยว` AS p ON d.trip_id = p.trip_id
-           JOIN `ค่าเที่ยวพิเศษ` AS sp ON sp.trip_id = p.trip_id
-           WHERE d.เบอร์โทร = ?
-           AND YEAR(o.order_date) = ?
-           AND MONTH(o.order_date) = ?
-           AND DAY(o.order_date) = ?
-           GROUP BY d.เบอร์โทร
-       """;
+            SELECT COALESCE((
+                SELECT (p.จำนวนเงิน + SUM(sp.จำนวนเงิน))
+                FROM `การจัดส่ง` AS d
+                JOIN `ออเดอร์` AS o ON o.order_id = d.order_id
+                JOIN `ค่าเที่ยว` AS p ON d.trip_id = p.trip_id
+                JOIN `ค่าเที่ยวพิเศษ` AS sp ON sp.trip_id = p.trip_id
+                WHERE d.เบอร์โทร = ?
+                AND YEAR(o.order_date) = ?
+                AND MONTH(o.order_date) = ?
+                AND DAY(o.order_date) = ?
+                AND o.สถานะออเดอร์ = 'อนุมัติ'
+                GROUP BY d.เบอร์โทร
+            ), 0) AS total
+        """;
+
         String queryIncomeMonth = """
-           SELECT COALESCE(p.จำนวนเงิน + SUM(sp.จำนวนเงิน))
-           FROM `การจัดส่ง` AS d
-           JOIN `ออเดอร์` AS o ON o.order_id = d.order_id
-           JOIN `ค่าเที่ยว` AS p ON d.trip_id = p.trip_id
-           JOIN `ค่าเที่ยวพิเศษ` AS sp ON sp.trip_id = p.trip_id
-           WHERE d.เบอร์โทร = ?
-           AND YEAR(o.order_date) = ?
-           AND MONTH(o.order_date) = ?
-           GROUP BY d.เบอร์โทร
-       """;
+            SELECT COALESCE((
+                SELECT (p.จำนวนเงิน + SUM(sp.จำนวนเงิน))
+                FROM `การจัดส่ง` AS d
+                JOIN `ออเดอร์` AS o ON o.order_id = d.order_id
+                JOIN `ค่าเที่ยว` AS p ON d.trip_id = p.trip_id
+                JOIN `ค่าเที่ยวพิเศษ` AS sp ON sp.trip_id = p.trip_id
+                WHERE d.เบอร์โทร = ?
+                AND YEAR(o.order_date) = ?
+                AND MONTH(o.order_date) = ?
+                AND o.สถานะออเดอร์ = 'อนุมัติ'
+                GROUP BY d.เบอร์โทร
+            ), 0) AS total
+        """;
         driverStats.setDistanceDeliveryDay(jdbcTemplate.queryForObject(queryDistanceDay, Integer.class ,ID, year, month, day));
         driverStats.setDistanceDeliveryMonth(jdbcTemplate.queryForObject(queryDistanceMonth, Integer.class ,ID, year, month));
         driverStats.setIncomeDeliveryDay(jdbcTemplate.queryForObject(queryIncomeDay, Integer.class ,ID, year, month, day));

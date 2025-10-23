@@ -77,7 +77,8 @@ public class DriverService {
         driverRepository.delete(id);
     }
 
-    public DriverStats getDriverStats(String id, int year, int month, int day) throws Exception {
-        return driverRepository.getDriverStats(id, year, month, day);
+    public DriverStats getDriverStats(String jwt, int year, int month, int day) throws Exception {
+        String phone  = jwtUtil.getPhoneFromLineToken(jwt);
+        return driverRepository.getDriverStats(phone, year, month, day);
     }
 }
