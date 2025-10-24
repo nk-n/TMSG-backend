@@ -39,13 +39,21 @@ public class OrderRepository {
     @Transactional
     public void save(Order order, String carNumber, String tel1, String tel2) throws Exception {
         try {
+            String queryDestination = """
+                    SELECT COALESCE((SELECT (ระยะทางจาก_SCBPK)
+                                        FROM `สถานที่จัดส่งปลายทาง`
+                                        WHERE `ชื่อสถานที่` = ?), 0) as total
+                    """;
+            int distance = jdbcTemplate.queryForObject(queryDestination, Integer.class, order.getDestination());
+
+
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=0");
             String tripId = UUID.randomUUID().toString();
             String query = """
             INSERT INTO `ค่าเที่ยว` (`จำนวนเงิน`, `trip_id`)
             VALUES (?, ?)
             """;
-            jdbcTemplate.update(query, "0", tripId);
+            jdbcTemplate.update(query, distance, tripId);
 
             query = """
                 INSERT INTO ออเดอร์ (order_id,ต้นทาง,สถานะออเดอร์,หมายเหตุ,order_date,ปริมาณแก๊ส,ปริมาณแก๊สที่ส่งให้ลูกค้า,เวลาเข้าโหลด,เวลาที่ต้องเสร็จ,จุดดรอป,ปลายทาง)
