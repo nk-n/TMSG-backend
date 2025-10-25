@@ -71,7 +71,7 @@ public class DriverTaskController {
     }
 
     @PutMapping ("/order/update")
-    public ResponseEntity<String> GetOrder(@RequestBody OrderUpdateStatus request) {
+    public ResponseEntity<String> updateOrderStatus(@RequestBody OrderUpdateStatus request) {
         try {
             orderService.updateStatus(request);
             return ResponseEntity.status(HttpStatus.OK).body("updated order success");
