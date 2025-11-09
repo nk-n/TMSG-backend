@@ -30,6 +30,7 @@ public class OrderService {
             Order order = new Order();
             order.setId(orderCreate.getId());
             order.setOrder_date(now);
+            order.setLoad_time(new SimpleDateFormat(dateFormat).parse(orderCreate.getLoad_time()));
             order.setDeadline(new SimpleDateFormat(dateFormat).parse(orderCreate.getDeadline()));
             order.setDrop(orderCreate.getDrop());
             order.setNote(orderCreate.getNote());
@@ -38,12 +39,13 @@ public class OrderService {
             order.setSource(orderCreate.getSource());
             order.setGas_amount(orderCreate.getGas_amount());
             order.setGas_send(0);
+            order.setGroupID(orderCreate.getGroup_id());
 
             orderRepository.save(order, orderCreate.getCar_id(), orderCreate.getTel1(), orderCreate.getTel2());
         }
     }
 
-    public UpdateSentGasWeightResponse updateSentGasWeight(UpdateSentGasWeightRequest request) throws DatabaseException {
+    public UpdateSentGasWeightResponse updateSentGasWeight(UpdateSentGasWeightRequest request) throws Exception {
         int rowAffected = orderRepository.updateSentGasWeight(request.getOrderID(), request.getWeight());
         if (rowAffected < 1) {
             throw new DatabaseException("Can't update sent gas weight");
@@ -55,15 +57,15 @@ public class OrderService {
     }
 
 
-    public List<OrderResponse> getOrder(String order_status) {
-        return orderRepository.get(order_status);
+    public List<OrderResponse> getOrder(String order_status, boolean asc) {
+        return orderRepository.get(order_status, asc);
     }
 
     public TotalOrderStatus getTotalOrderStatus() {
         return orderRepository.getTotalOrderStatus();
     }
 
-    public void updateStatus(OrderUpdateStatus orderStatus) {
+    public void updateStatus(OrderUpdateStatus orderStatus) throws Exception {
         orderRepository.updateStatus(orderStatus.getOrder_id(), orderStatus.getStatus());
     }
 }

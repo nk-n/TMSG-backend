@@ -47,7 +47,7 @@ public class UserService {
         }
     }
 
-    public void createUser(NewUserRequest request) {
+    public void createUser(NewUserRequest request) throws Exception {
         User user = new User();
         user.setId(request.getUsername());
         user.setPassword(encoder.encode(request.getPassword()));
@@ -68,7 +68,7 @@ public class UserService {
             return  userResponse;
         } catch (UsernameNotFoundException e) {
             throw new UsernameNotFoundException(e.getMessage());
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw new DataAccessException(e.getMessage()){};
         }
     }
@@ -108,7 +108,7 @@ public class UserService {
             userResponse.setName(user.getName());
             userResponse.setPhone(user.getPhone());
             return  userResponse;
-        } catch (DataAccessException e) {
+        } catch (Exception e) {
             throw new DataAccessException(e.getMessage()){};
         }
     }

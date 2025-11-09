@@ -33,15 +33,17 @@ public class AuthenticationController {
     JwtUtil jwtUtils;
 
     @PostMapping("/new-user")
-    public String registerUser(@RequestBody NewUserRequest request) {
+    public String registerUser(@RequestBody NewUserRequest request) throws Exception {
+        try {
+            if (userService.userExists(request.getUsername()))
+                return "Error: Username is already taken!";
 
 
-        if (userService.userExists(request.getUsername()))
-            return "Error: Username is already taken!";
-
-
-        userService.createUser(request);
-        return "User registered successfully!";
+            userService.createUser(request);
+            return "User registered successfully!";
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
     }
 
 

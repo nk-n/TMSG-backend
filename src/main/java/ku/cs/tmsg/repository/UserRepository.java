@@ -1,6 +1,7 @@
 package ku.cs.tmsg.repository;
 
 import ku.cs.tmsg.entity.User;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -16,10 +17,12 @@ import java.util.List;
 @Repository
 public class UserRepository {
     private JdbcTemplate jdbcTemplate;
+    private LogRepository logRepository;
 
     @Autowired
-    public UserRepository(JdbcTemplate jdbcTemplate) {
+    public UserRepository(JdbcTemplate jdbcTemplate, LogRepository logRepository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.logRepository = logRepository;
     }
 
     public User findByUsername(String username) {
@@ -32,13 +35,14 @@ public class UserRepository {
         return findByUsername(username) != null;
     }
 
-    public User save(User user) {
+    public User save(User user) throws Exception {
         String query = "insert into พนักงานจัดส่ง (ID,ชื่อ,พร้อมทำงาน,เบอร์โทร,ตำแหน่ง,รหัสผ่าน) values (?,?,?,?,?,?)";
         int status = jdbcTemplate.update(query, user.getId(), user.getName(), true, user.getPhone(), user.getRole(), user.getPassword());
         if (status == 0) {
             System.err.println("Can't create new user.");
             return null;
         }
+        logRepository.save("create user", "user", "create");
         return user;
     }
 
@@ -54,7 +58,7 @@ public class UserRepository {
         }
     }
 
-    public int editData(String id, String name, String phone, String password) {
+    public int editData(String id, String name, String phone, String password) throws Exception {
         String query = """
         UPDATE พนักงานจัดส่ง 
             SET ชื่อ = ?, 
@@ -67,10 +71,11 @@ public class UserRepository {
         if (status == 0) {
             throw new DataAccessException("f user") {};
         }
+        logRepository.save("update user", "user", "update");
         return status;
     }
 
-    public User softDelete(String id) {
+    public User softDelete(String id) throws Exception {
         User user = findByUsername(id);
         if (user == null || !user.isStatus()) {
             throw new UsernameNotFoundException("No such user");
@@ -81,6 +86,7 @@ public class UserRepository {
         if (status == 0) {
             throw new DataAccessException("failed to delete user") {};
         }
+        logRepository.save("delete user", "user", "delete");
         return user;
     }
 

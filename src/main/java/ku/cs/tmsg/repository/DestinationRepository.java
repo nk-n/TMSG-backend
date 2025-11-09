@@ -6,6 +6,7 @@ import ku.cs.tmsg.entity.Driver;
 import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.exception.DatabaseException;
 import ku.cs.tmsg.service.DBResultUtils;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,11 +21,13 @@ import java.util.Set;
 public class DestinationRepository {
     private JdbcTemplate jdbcTemplate;
     private DBResultUtils dbResultUtils;
+    private LogRepository logRepository;
 
     @Autowired
-    public DestinationRepository(JdbcTemplate jdbcTemplate) {
+    public DestinationRepository(JdbcTemplate jdbcTemplate, DBResultUtils dbResultUtils, LogRepository logRepository) {
         this.jdbcTemplate = jdbcTemplate;
-        this.dbResultUtils = new DBResultUtils();
+        this.dbResultUtils = dbResultUtils;
+        this.logRepository = logRepository;
     }
 
     public void save(Destination destination) throws Exception {
@@ -44,6 +47,7 @@ public class DestinationRepository {
         if (rows == 0) {
             throw new DatabaseException("can't create new destination");
         }
+        logRepository.save("create destination metadata", "destination", "create");
     }
 
     public List<Destination> get() {
@@ -101,6 +105,7 @@ public class DestinationRepository {
                 WHERE ชื่อสถานที่ = ?
                 """;
         jdbcTemplate.update(query, false, name);
+        logRepository.save("delete destination metadata", "destination", "delete");
     }
 
 }

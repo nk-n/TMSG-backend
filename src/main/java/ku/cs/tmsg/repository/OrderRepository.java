@@ -29,11 +29,13 @@ import java.util.*;
 public class OrderRepository {
     private JdbcTemplate jdbcTemplate;
     private DBResultUtils dbResultUtils;
+    private LogRepository logRepository;
 
     @Autowired
-    public OrderRepository(JdbcTemplate jdbcTemplate, DBResultUtils dbResultUtils) {
+    public OrderRepository(JdbcTemplate jdbcTemplate, DBResultUtils dbResultUtils, LogRepository logRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.dbResultUtils = dbResultUtils;
+        this.logRepository = logRepository;
     }
 
     @Transactional
@@ -56,10 +58,10 @@ public class OrderRepository {
             jdbcTemplate.update(query, distance, tripId);
 
             query = """
-                INSERT INTO ออเดอร์ (order_id,ต้นทาง,สถานะออเดอร์,หมายเหตุ,order_date,ปริมาณแก๊ส,ปริมาณแก๊สที่ส่งให้ลูกค้า,เวลาเข้าโหลด,เวลาที่ต้องเสร็จ,จุดดรอป,ปลายทาง)
-                VALUES (?,?,?,?,?,?,?,?,?,?,?)
+                INSERT INTO ออเดอร์ (order_id,ต้นทาง,สถานะออเดอร์,หมายเหตุ,order_date,ปริมาณแก๊ส,ปริมาณแก๊สที่ส่งให้ลูกค้า,เวลาเข้าโหลด,เวลาที่ต้องเสร็จ,จุดดรอป,ปลายทาง,ลำดับเที่ยว)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
                 """;
-            jdbcTemplate.update(query, order.getId(), order.getSource(), order.getStatus().getDisplayName(), order.getNote(), order.getOrder_date(), order.getGas_amount(), order.getGas_send(), order.getLoad_time(), order.getDeadline(), order.getDrop(),  order.getDestination());
+            jdbcTemplate.update(query, order.getId(), order.getSource(), order.getStatus().getDisplayName(), order.getNote(), order.getOrder_date(), order.getGas_amount(), order.getGas_send(), order.getLoad_time(), order.getDeadline(), order.getDrop(),  order.getDestination(), order.getGroupID());
 
             String deliveryId1 = UUID.randomUUID().toString();
             query = """
@@ -76,13 +78,14 @@ public class OrderRepository {
                """;
                 jdbcTemplate.update(query,deliveryId2, carNumber, tel2, tripId, order.getId());
             }
+            logRepository.save("insert order", "order", "insert");
         } finally {
             jdbcTemplate.execute("SET FOREIGN_KEY_CHECKS=1");
         }
     }
 
-    public List<OrderResponse> get(String orderStatus) {
-        String query = """
+    public List<OrderResponse> get(String orderStatus, boolean asc) {
+        String queryASC = """
                 SELECT `เบอร์รถ`, d.`order_id`, `หมายเหตุ`, `เวลาที่ต้องเสร็จ`, `สถานะออเดอร์`, `ปลายทาง`, `จุดดรอป`, `ปริมาณแก๊ส`, `ปริมาณแก๊สที่ส่งให้ลูกค้า`, driver.`ชื่อ`, driver.`เบอร์โทร`, `เวลาเข้าโหลด`, dest.`ระยะเวลาที่ใช้เดินทาง_SCBPK`, pay.trip_id, pay.`จำนวนเงิน`, dest.`ระยะทางจาก_SCBPK`
                 FROM `การจัดส่ง` as d
                 JOIN `ออเดอร์` as o ON o.order_id = d.order_id
@@ -92,7 +95,22 @@ public class OrderRepository {
                 WHERE `สถานะออเดอร์` = ?
                 ORDER BY o.`เวลาที่ต้องเสร็จ`
                 """;
-        List<OrderResponse> orders = jdbcTemplate.query(query, new OrderRepository.OrderResponseExtractor(), orderStatus);
+        String queryDES = """
+                SELECT `เบอร์รถ`, d.`order_id`, `หมายเหตุ`, `เวลาที่ต้องเสร็จ`, `สถานะออเดอร์`, `ปลายทาง`, `จุดดรอป`, `ปริมาณแก๊ส`, `ปริมาณแก๊สที่ส่งให้ลูกค้า`, driver.`ชื่อ`, driver.`เบอร์โทร`, `เวลาเข้าโหลด`, dest.`ระยะเวลาที่ใช้เดินทาง_SCBPK`, pay.trip_id, pay.`จำนวนเงิน`, dest.`ระยะทางจาก_SCBPK`
+                FROM `การจัดส่ง` as d
+                JOIN `ออเดอร์` as o ON o.order_id = d.order_id
+                JOIN `พนักงานขับรถ` as driver ON d.เบอร์โทร = driver.`เบอร์โทร`
+                JOIN `สถานที่จัดส่งปลายทาง` as dest ON dest.`ชื่อสถานที่` = o.`ปลายทาง`
+                JOIN `ค่าเที่ยว` as pay ON pay.trip_id = d.trip_id
+                WHERE `สถานะออเดอร์` = ?
+                ORDER BY o.`เวลาที่ต้องเสร็จ` DESC
+                """;
+        List<OrderResponse> orders;
+        if (asc) {
+            orders = jdbcTemplate.query(queryASC, new OrderRepository.OrderResponseExtractor(), orderStatus);
+        } else {
+            orders = jdbcTemplate.query(queryDES, new OrderRepository.OrderResponseExtractor(), orderStatus);
+        }
 
         String queryDeliveryStatus = """
                 SELECT timestamp_status, `สถานะ`
@@ -204,21 +222,23 @@ public class OrderRepository {
         }
     }
 
-    public void updateStatus(String orderId, String status) {
+    public void updateStatus(String orderId, String status) throws Exception {
         String query = """
                 UPDATE `ออเดอร์`
                 SET `สถานะออเดอร์` = ?
                 WHERE `order_id` = ?
                 """;
         jdbcTemplate.update(query, status, orderId);
+        logRepository.save("update order status to " + status, "order", "update");
     }
 
-    public int updateSentGasWeight(String orderId, double sentGasWeight) {
+    public int updateSentGasWeight(String orderId, double sentGasWeight) throws Exception {
         String query = """
                 UPDATE `ออเดอร์`
                 SET `ปริมาณแก๊สที่ส่งให้ลูกค้า` = ?
                 WHERE `order_id` = ?
                 """;
+        logRepository.save("update order amount gas sent", "order", "update");
         return jdbcTemplate.update(query, sentGasWeight, orderId);
     }
 
@@ -278,7 +298,6 @@ public class OrderRepository {
                 FROM `ออเดอร์`;
                 """;
         return jdbcTemplate.query(query, new OrderTotalMapper()).getFirst();
-
     }
 
     private class OrderTotalMapper implements RowMapper<TotalOrderStatus> {

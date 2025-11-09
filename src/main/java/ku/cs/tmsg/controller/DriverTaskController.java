@@ -88,6 +88,8 @@ public class DriverTaskController {
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (DatabaseException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 }
