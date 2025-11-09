@@ -8,6 +8,7 @@ import ku.cs.tmsg.entity.enums.CarAndDriverStatus;
 import ku.cs.tmsg.entity.enums.CarType;
 import ku.cs.tmsg.entity.enums.CarWeight;
 import ku.cs.tmsg.exception.DatabaseException;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -21,10 +22,12 @@ import java.util.List;
 @Repository
 public class DriverRepository {
     private JdbcTemplate jdbcTemplate;
+    private LogRepository logRepository;
 
     @Autowired
-    public DriverRepository(JdbcTemplate jdbcTemplate) {
+    public DriverRepository(JdbcTemplate jdbcTemplate, LogRepository logRepository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.logRepository = logRepository;
     }
 
     public void save(Driver driver) throws Exception {
@@ -42,6 +45,7 @@ public class DriverRepository {
         if (rows == 0) {
             throw new DatabaseException("can't create new driver");
         }
+        logRepository.save("insert driver metadata", "driver", "insert");
     }
 
     public List<Driver> get() {
@@ -99,6 +103,7 @@ public class DriverRepository {
                 WHERE เบอร์โทร = ?
                 """;
         jdbcTemplate.update(query, status.getDisplayName(), available, tel);
+        logRepository.save("update driver metadata", "driver", "update");
     }
 
     public void updateNote(String tel, String note) throws Exception {
@@ -109,6 +114,7 @@ public class DriverRepository {
                 WHERE เบอร์โทร = ?
                 """;
         jdbcTemplate.update(query, note, tel);
+        logRepository.save("update driver note", "driver", "update");
     }
 
     public void delete(String tel) throws Exception {
@@ -119,6 +125,7 @@ public class DriverRepository {
                 WHERE เบอร์โทร = ?
                 """;
         jdbcTemplate.update(query, false, tel);
+        logRepository.save("delete driver", "driver", "delete");
     }
 
     public DriverStats getDriverStats(String ID, int year, int month, int day) {

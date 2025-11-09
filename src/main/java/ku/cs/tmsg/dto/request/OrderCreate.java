@@ -17,4 +17,5 @@ public class OrderCreate {
     private String tel1;
     private String tel2;
     private String load_time;
+    private int group_id;
 }

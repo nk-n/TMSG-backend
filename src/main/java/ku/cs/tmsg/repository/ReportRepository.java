@@ -72,20 +72,20 @@ public class ReportRepository {
               sub.`น้ำหนัก`, sub.month
                 """;
         String queryCar = """
-              SELECT sub.`น้ำหนัก`, sub.month, COUNT(sub.total_sum) as total_sum FROM (
-              SELECT DISTINCT car.`น้ำหนัก`, MONTH(o.`เวลาที่ต้องเสร็จ`) AS month, d.เบอร์รถ AS total_sum
-              FROM
-                   `การจัดส่ง` AS d
-                   JOIN `ออเดอร์` AS o ON o.order_id = d.order_id
-                   JOIN `รถขนส่ง` AS car ON car.`เบอร์รถ` = d.`เบอร์รถ`
-                   JOIN `สถานที่จัดส่งปลายทาง` AS dest ON o.`ปลายทาง` = dest.`ชื่อสถานที่`
-              WHERE
-                   o.`สถานะออเดอร์` = 'อนุมัติ'
-                   AND YEAR(o.`เวลาที่ต้องเสร็จ`) = ?
-              ) as sub
-              GROUP BY sub.month, sub.`น้ำหนัก`
-              ORDER BY
-              sub.`น้ำหนัก`, sub.month
+                  SELECT sub.`น้ำหนัก`, sub.month, COUNT(sub.total_sum) as total_sum FROM (
+                  SELECT DISTINCT car.`น้ำหนัก`, MONTH(o.`เวลาที่ต้องเสร็จ`) AS month, d.เบอร์รถ AS total_sum
+                  FROM
+                       `การจัดส่ง` AS d
+                       JOIN `ออเดอร์` AS o ON o.order_id = d.order_id
+                       JOIN `รถขนส่ง` AS car ON car.`เบอร์รถ` = d.`เบอร์รถ`
+                       JOIN `สถานที่จัดส่งปลายทาง` AS dest ON o.`ปลายทาง` = dest.`ชื่อสถานที่`
+                  WHERE
+                       o.`สถานะออเดอร์` = 'อนุมัติ'
+                       AND YEAR(o.`เวลาที่ต้องเสร็จ`) = ?
+                  ) as sub
+                  GROUP BY sub.month, sub.`น้ำหนัก`
+                  ORDER BY
+                  sub.`น้ำหนัก`, sub.month
                 """;
         String queryDriver = """
               SELECT sub.`น้ำหนัก`, sub.month, COUNT(sub.total_sum) as total_sum FROM (

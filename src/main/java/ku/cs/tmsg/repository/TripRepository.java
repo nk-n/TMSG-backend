@@ -22,10 +22,12 @@ import java.util.*;
 @Repository
 public class TripRepository {
     private JdbcTemplate jdbcTemplate;
+    private LogRepository logRepository;
 
     @Autowired
-    public TripRepository(JdbcTemplate jdbcTemplate) {
+    public TripRepository(JdbcTemplate jdbcTemplate, LogRepository logRepository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.logRepository = logRepository;
     }
 
 
@@ -63,6 +65,7 @@ public class TripRepository {
         if (rows == 0) {
             throw new DatabaseException("can't add new special trip");
         }
+        logRepository.save("create special trip", "special trip", "create");
     }
 
     public void deleteSpecialTripsById(String id) throws Exception {
@@ -74,5 +77,6 @@ public class TripRepository {
         if (rows == 0) {
             throw new DatabaseException("can't delete special trip");
         }
+        logRepository.save("delete special trip", "special trip", "delete");
     }
 }

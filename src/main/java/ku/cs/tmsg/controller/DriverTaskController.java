@@ -71,7 +71,7 @@ public class DriverTaskController {
     }
 
     @PutMapping ("/order/update")
-    public ResponseEntity<String> GetOrder(@RequestBody OrderUpdateStatus request) {
+    public ResponseEntity<String> updateOrderStatus(@RequestBody OrderUpdateStatus request) {
         try {
             orderService.updateStatus(request);
             return ResponseEntity.status(HttpStatus.OK).body("updated order success");
@@ -87,6 +87,8 @@ public class DriverTaskController {
             UpdateSentGasWeightResponse response = orderService.updateSentGasWeight(request);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (DatabaseException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }

@@ -112,10 +112,10 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.PUT, "/api/users/delete").hasAnyAuthority("ROLE_ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/users/edit").hasAnyAuthority("ROLE_ADMIN")
 
-                                .requestMatchers("/api/metadata/**").permitAll()
-                                .requestMatchers("/api/order/**").permitAll()
-                                .requestMatchers("/api/trip/**").permitAll()
-                                .requestMatchers("/api/report/**").permitAll()
+                                .requestMatchers("/api/metadata/**").hasAnyAuthority("ROLE_USER")
+                                .requestMatchers("/api/order/**").hasAnyAuthority("ROLE_USER")
+                                .requestMatchers("/api/trip/**").hasAnyAuthority("ROLE_USER")
+                                .requestMatchers("/api/report/**").hasAnyAuthority("ROLE_USER")
 
 
 

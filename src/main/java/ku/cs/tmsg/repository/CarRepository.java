@@ -8,6 +8,7 @@ import ku.cs.tmsg.entity.enums.CarWeight;
 import ku.cs.tmsg.exception.DatabaseException;
 import ku.cs.tmsg.exception.NotFoundException;
 import ku.cs.tmsg.service.DBResultUtils;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -22,11 +23,13 @@ import java.util.Set;
 public class CarRepository {
     private JdbcTemplate jdbcTemplate;
     private DBResultUtils dbResultUtils;
+    private LogRepository logRepository;
 
     @Autowired
-    public CarRepository(JdbcTemplate jdbcTemplate, DBResultUtils dbResultUtils) {
+    public CarRepository(JdbcTemplate jdbcTemplate, DBResultUtils dbResultUtils, LogRepository logRepository) {
         this.jdbcTemplate = jdbcTemplate;
         this.dbResultUtils = dbResultUtils;
+        this.logRepository = logRepository;
     }
 
     public void save(Car car) throws Exception {
@@ -46,6 +49,8 @@ public class CarRepository {
         if (rows == 0) {
             throw new DatabaseException("can't create new car");
         }
+
+        logRepository.save("create car metadata", "car", "create");
     }
 
     public List<Car> get() {
@@ -106,6 +111,7 @@ public class CarRepository {
                 WHERE เบอร์รถ = ?
                 """;
         jdbcTemplate.update(query, status.getDisplayName(), available, id);
+        logRepository.save("update car status", "car", "update");
     }
 
     public void updateNote(String id, String note) throws Exception {
@@ -116,6 +122,7 @@ public class CarRepository {
                 WHERE เบอร์รถ = ?
                 """;
         jdbcTemplate.update(query, note, id);
+        logRepository.save("update car note", "car", "update");
     }
 
     public void delete(String id) throws Exception {
@@ -126,6 +133,7 @@ public class CarRepository {
                 WHERE เบอร์รถ = ?
                 """;
         jdbcTemplate.update(query, false, id);
+        logRepository.save("delete car metadata", "car", "delete");
     }
 
 }

@@ -3,6 +3,7 @@ package ku.cs.tmsg.controller;
 import ku.cs.tmsg.dto.response.ApiResponse;
 import ku.cs.tmsg.dto.request.LoginRequest;
 import ku.cs.tmsg.dto.request.NewUserRequest;
+import ku.cs.tmsg.dto.response.SignInResponse;
 import ku.cs.tmsg.security.JwtUtil;
 import ku.cs.tmsg.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,20 +33,22 @@ public class AuthenticationController {
     JwtUtil jwtUtils;
 
     @PostMapping("/new-user")
-    public String registerUser(@RequestBody NewUserRequest request) {
+    public String registerUser(@RequestBody NewUserRequest request) throws Exception {
+        try {
+            if (userService.userExists(request.getUsername()))
+                return "Error: Username is already taken!";
 
 
-        if (userService.userExists(request.getUsername()))
-            return "Error: Username is already taken!";
-
-
-        userService.createUser(request);
-        return "User registered successfully!";
+            userService.createUser(request);
+            return "User registered successfully!";
+        } catch (Exception e) {
+            return "Error: " + e.getMessage();
+        }
     }
 
 
     @PostMapping("/signin")
-    public ResponseEntity<ApiResponse<String>> authenticateUser(@RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<SignInResponse>> authenticateUser(@RequestBody LoginRequest request) {
 
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -56,9 +59,9 @@ public class AuthenticationController {
             );
             UserDetails userDetails =
                     (UserDetails) authentication.getPrincipal();
-            return ResponseEntity.ok(new ApiResponse<String>("OK", jwtUtils.generateToken(userDetails.getUsername())));
+            return ResponseEntity.ok(new ApiResponse<>("OK", new SignInResponse(jwtUtils.generateToken(userDetails.getUsername()), userDetails.getAuthorities().toString(), userDetails.getUsername())));
         } catch (BadCredentialsException e) {
-            return ResponseEntity.badRequest().body(new ApiResponse<String>("bad credential","invalid credentials®" ));
+            return ResponseEntity.badRequest().body(new ApiResponse<>("bad credential", null));
         }
     }
 

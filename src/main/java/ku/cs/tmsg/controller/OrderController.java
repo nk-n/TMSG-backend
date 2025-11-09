@@ -37,10 +37,10 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/{status}")
-    public ResponseEntity<ApiResponse<List<OrderResponse>>> GetOrder(@PathVariable String status) {
+    @GetMapping("/{status}/{asc}")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> GetOrder(@PathVariable String status, @PathVariable Boolean asc) {
         try {
-            List<OrderResponse> orders = orderService.getOrder(status);
+            List<OrderResponse> orders = orderService.getOrder(status, asc);
             return ResponseEntity.status(HttpStatus.OK).body(new ApiResponse<List<OrderResponse>>("get orders success", orders));
         } catch (Exception e) {
             System.err.println(e.getMessage());
